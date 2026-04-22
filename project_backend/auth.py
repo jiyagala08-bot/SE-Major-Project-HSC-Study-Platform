@@ -39,6 +39,9 @@ class Signup(Resource):
         if db_user or db_email:
             return {"message": f"User with username {username} or email {email} already exists"}, 400
 
+        if len(password) < 8:
+            return {"message": "Password must be at least 8 characters long"}, 400
+
         new_user = User(
             email=email,
             username=username,
