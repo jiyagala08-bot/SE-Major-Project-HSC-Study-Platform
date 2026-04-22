@@ -22,6 +22,10 @@ async function signupUser() {
 
   if (response.ok) {
     alert("Signup successful");
+    document.getElementById("signup-email").value = "";
+    document.getElementById("signup-username").value = "";
+    document.getElementById("signup-password").value = "";
+    document.getElementById("signup-cpassword").value = "";
     return;
   }
 
@@ -55,7 +59,7 @@ async function loginUser() {
   if (response.ok) {
     localStorage.setItem("token", data.access_token);
     alert("Login successful");
-    window.location.href = "/home.html";
+    document.getElementById("login-username").value = "";
     return;
   }
 
