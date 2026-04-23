@@ -21,7 +21,7 @@
     </ul>
   </nav>
 </header>
-<body>
+
 <body>
 
   <h1>Task Dashboard</h1>
@@ -30,10 +30,10 @@
   <div id="create-task">
     <input id="task-title" placeholder="Task Title">
     <input id="task-desc" placeholder="Task Description">
-    <input id="task-priority" type="number" placeholder="Priority Level (1–5)">
+    <input id="task-priority" type="number" placeholder="Priority Level (1–10)">
     <input id="task-subject" type="number" placeholder="Subject ID">
 
-    <button onclick="handleCreateTask()">Add Task</button>
+    <button id="Add-task" onclick="handleCreateTask()">Add Task</button>
   </div>
 
   <hr>
@@ -41,9 +41,9 @@
   <!-- Task List -->
   <div id="task-list"></div>
 
-  <button onclick="logoutUser()">Logout</button>
+  <button id="lgout" onclick="logoutUser()">Logout</button>
 
-  <script src="tasks.js"></script>
+  <script src="index.js"></script>
 
   <script>
     async function handleCreateTask() {

@@ -114,7 +114,7 @@ p{
 }
 
 /* Input fields */
-#signup-email, #signup-username, #signup-password, #signup-cpassword{
+#signup-email, #signup-username, #signup-password, #signup-cpassword, #task-title, #task-desc, #task-priority, #task-subject{
   color: #000;
   display: block;
   margin: 10px auto;
@@ -148,11 +148,11 @@ p{
 }
 
 
-#add-task-btn, #clear-tasks-btn, #sign-up-btn, #login-btn {
+#Add-task, #clear-tasks-btn, #sign-up-btn, #login-btn, #lgout {
   width: 100px;
   height: 50px;
   cursor: pointer;
-  background-color: #F3E4C9;
+  background-color: #B2AC88;
   color: #FFF;
   font-weight: bold;
   font-family: "Playfair Display", serif;
