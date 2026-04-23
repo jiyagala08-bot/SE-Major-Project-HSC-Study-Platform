@@ -12,7 +12,7 @@ async function signupUser() {
     return;
   }
 
-  const response = await fetch("/auth/signup", {
+  const response = await fetch("https://didactic-meme-qvq94rrw99wphq6r-5000.app.github.dev/auth/signup", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, username, password })
@@ -48,7 +48,7 @@ async function loginUser() {
   const username = document.getElementById("login-username").value;
   const password = document.getElementById("login-password").value;
 
-  const response = await fetch("/auth/login", {
+  const response = await fetch("https://didactic-meme-qvq94rrw99wphq6r-5000.app.github.dev/auth/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, password })
@@ -60,6 +60,7 @@ async function loginUser() {
     localStorage.setItem("token", data.access_token);
     alert("Login successful");
     document.getElementById("login-username").value = "";
+    document.getElementById("login-password").value = "";
     return;
   }
 

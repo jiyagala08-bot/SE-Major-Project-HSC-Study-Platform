@@ -8,8 +8,7 @@
   <link rel="stylesheet" href="main.css">
   <link rel="icon" type="image/x-icon" href="Screenshot_2026-04-13_104648-removebg-preview.ico">
 </head>
-<body>
-  <header>
+<header>
   <nav class="navbar">
     <div class="icon">
     <img src="Screenshot_2026-04-13_104648-removebg-preview.png" alt="Perfectionist Logo">
@@ -22,19 +21,56 @@
     </ul>
   </nav>
 </header>
-  <main>
-  <h4> Hello. </h4>
-  <h4> Shall we begin? </h4>
-  <h3> Tasks </h3>
-  <div id="tasks-container">
-    <!-- Tasks will be dynamically added here -->
+<body>
+<body>
+
+  <h1>Task Dashboard</h1>
+
+  <!-- Create Task Form -->
+  <div id="create-task">
+    <input id="task-title" placeholder="Task Title">
+    <input id="task-desc" placeholder="Task Description">
+    <input id="task-priority" type="number" placeholder="Priority Level (1–5)">
+    <input id="task-subject" type="number" placeholder="Subject ID">
+
+    <button onclick="handleCreateTask()">Add Task</button>
   </div>
-  <button id="add-task-btn">Add Task</button>
-  <button id="clear-tasks-btn">Clear Tasks</button>
-  <h3> You have made collectively</h3>
-  <h1> X%</h1>
-  <h3> progress towards your priority tasks! </h3>
-  <script src="main.js"></script>
-  </main>
+
+  <hr>
+
+  <!-- Task List -->
+  <div id="task-list"></div>
+
+  <button onclick="logoutUser()">Logout</button>
+
+  <script src="tasks.js"></script>
+
+  <script>
+    async function handleCreateTask() {
+      const title = document.getElementById("task-title").value;
+      const description = document.getElementById("task-desc").value;
+      const priority = document.getElementById("task-priority").value;
+      const subject = document.getElementById("task-subject").value;
+
+      if (!title || !description) {
+        alert("Title and description are required");
+        return;
+      }
+
+      const created = await createTask(title, description, priority, subject);
+
+      if (created) {
+        document.getElementById("task-title").value = "";
+        document.getElementById("task-desc").value = "";
+        document.getElementById("task-priority").value = "";
+        document.getElementById("task-subject").value = "";
+
+        loadTasks();
+      }
+    }
+
+    loadTasks();
+  </script>
+
 </body>
 </html>

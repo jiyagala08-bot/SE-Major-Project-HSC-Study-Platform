@@ -5,7 +5,7 @@ if ('serviceWorker' in navigator) {
     .catch(err => console.log('Service Worker registration failed:', err));
 }
 
-const BASE_URL = "https://probable-space-memory-975p9xwj6jx729pv7-5000.app.github.dev";
+const BASE_URL = "https://didactic-meme-qvq94rrw99wphq6r-5000.app.github.dev";
 
 function getToken() {
   return localStorage.getItem("token");

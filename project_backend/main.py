@@ -6,9 +6,11 @@ from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
 from tasks import task_ns
 from auth import auth_ns
+from flask_cors import CORS
 
 def create_app(config):
     app=Flask(__name__)
+    CORS(app)
     app.config.from_object(config)
 
     db.init_app(app)
