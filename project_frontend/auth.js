@@ -21,15 +21,31 @@ async function signupUser() {
   const data = await response.json();
 
   if (response.ok) {
-    alert("Signup successful");
+    alert("Signup successful! Welcome to your productive double life!");
     document.getElementById("signup-email").value = "";
     document.getElementById("signup-username").value = "";
     document.getElementById("signup-password").value = "";
-    document.getElementById("signup-cpassword").value = "";
+    return;
+  }
+  if (data.message === "Password must be at least 8 characters long") {
+    alert(data.message);
+    return;
+  }
+  if (data.message === "Password must be less than 50 characters long") {
+    alert(data.message);
+    return;
+  }
+  if (data.message === `Invalid email format`) {
+    alert(data.message);
     return;
   }
 
-  if (data.message === "Password must be at least 8 characters long") {
+  if (data.message === `Invalid username format`) {
+    alert(data.message);
+    return;
+  }
+
+  if (data.message === `Password must contain at least one letter, number, and special character`) {
     alert(data.message);
     return;
   }
