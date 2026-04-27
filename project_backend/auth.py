@@ -1,10 +1,13 @@
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from requests import session
 from flask import Flask, request, jsonify, make_response
 from flask_restx import Resource, Namespace, fields
 from models import User
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token, create_refresh_token
 from exts import db
 import re
+
 
 auth_ns = Namespace('auth', description='Authentication related operations')
 
@@ -35,9 +38,9 @@ class Signup(Resource):
     def post(self):
         data = request.get_json()
 
-        username = data.get('username', '').strip()
-        email = data.get('email', '').strip()
-        password = data.get('password', '')
+        username = data.get('username')
+        email = data.get('email')
+        password = data.get('password')
 
         # LENGTH CHECKS
         if len(password) < 8:
@@ -77,11 +80,11 @@ class Signup(Resource):
 
 @auth_ns.route('/login')
 class Login(Resource):
-    @auth_ns.expect(login_model)
+    @staticmethod
     def sanitise_name(name):
         return re.sub(r"[^a-zA-Z\s-]", "", name).strip()
-    def sanitise_password(password):
-        return re.sub(r"[^a-zA-Z0-9!@#$%^&*()_+]", "", password).strip()
+    
+    @auth_ns.expect(login_model)
     def post(self):
         data = request.get_json()
 
@@ -92,5 +95,18 @@ class Login(Resource):
 
         if db_user is None or not check_password_hash(db_user.password, data['password']):
             return {"message": "Invalid username or password"}, 401
-        token = create_access_token(identity=db_user.id)
-        return {"message": "User created", "access_token": token}, 201
+        access_token = create_access_token(identity=db_user.id)
+        refresh_token = create_refresh_token(identity=db_user.id)
+
+        return {"message": "User logged in",
+                "access_token": access_token,
+                "refresh_token": refresh_token
+        }, 200
+
+@auth_ns.route('/refresh')
+class Refresh(Resource):
+    @jwt_required(refresh=True)
+    def post(self):
+        current_user = get_jwt_identity()
+        new_access_token = create_access_token(identity=current_user)
+        return {"access_token": new_access_token}, 200
