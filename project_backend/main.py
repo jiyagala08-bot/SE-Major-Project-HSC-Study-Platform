@@ -10,7 +10,7 @@ from flask_cors import CORS
 
 def create_app(config):
     app=Flask(__name__)
-    CORS(app, resources={r"/*": {"origins": ["*"]}})
+    CORS(app)
     app.config.from_object(config)
 
     db.init_app(app)
@@ -22,11 +22,6 @@ def create_app(config):
 
     api.add_namespace(task_ns)
     api.add_namespace(auth_ns)
-
-    @app.errorhandler(Exception)
-    def handle_error(e):
-        code = getattr(e, "code", 500)
-        return jsonify({"message": str(e)}), code
 
     @app.shell_context_processor
     def make_shell_context():

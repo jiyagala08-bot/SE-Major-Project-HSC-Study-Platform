@@ -26,8 +26,6 @@ async function signupUser() {
     document.getElementById("signup-username").value = "";
     document.getElementById("signup-password").value = "";
     document.getElementById("signup-cpassword").value = "";
-    console.log("Redirecting now...");
-    window.location.href = "/logon.html";
     return;
   }
   if (data.message === "Password must be at least 8 characters long") {
@@ -76,7 +74,7 @@ async function loginUser() {
   const data = await response.json();
 
   if (response.ok) {
-    localStorage.setItem("access_token", data.access_token);
+    localStorage.setItem("access_token", data.token);
     localStorage.setItem("refresh_token", data.refresh_token);
     alert("Login successful");
     document.getElementById("login-username").value = "";

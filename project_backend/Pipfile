@@ -5,7 +5,6 @@ name = "pypi"
 
 [packages]
 flask-migrate = "*"
-flask-cors = "*"
 aniso8601 = "==10.0.1"
 python-decouple = "==3.8"
 attrs = {version = "==26.1.0", markers = "python_version >= \"3.9\""}
@@ -30,6 +29,7 @@ typing-extensions = {version = "==4.15.0", markers = "python_version >= \"3.9\""
 werkzeug = {version = "==3.1.8", markers = "python_version >= \"3.9\""}
 flask-mail = "*"
 requests = "*"
+flask-cors = "*"
 
 [dev-packages]
 

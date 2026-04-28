@@ -95,11 +95,11 @@ class Login(Resource):
 
         if db_user is None or not check_password_hash(db_user.password, data['password']):
             return {"message": "Invalid username or password"}, 401
-        access_token = create_access_token(identity=db_user.id)
+        token = create_access_token(identity=db_user.id)
         refresh_token = create_refresh_token(identity=db_user.id)
 
         return {"message": "User logged in",
-                "access_token": access_token,
+                "access_token": token,
                 "refresh_token": refresh_token
         }, 200
 
