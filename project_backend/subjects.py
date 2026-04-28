@@ -83,7 +83,9 @@ class AssessmentListResource(Resource):
         current_user=get_jwt_identity()
         assessments = Assessment.query.join(Subject).filter(Subject.user_id == current_user).all()
         return assessments
-    def create(self):
+    @jwt_required()
+    @assessment_ns.expect(assessment_model)
+    def post(self):
         """Create a new assessment"""
         current_user=get_jwt_identity()
         data=request.get_json()

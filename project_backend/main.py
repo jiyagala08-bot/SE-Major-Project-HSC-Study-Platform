@@ -6,6 +6,7 @@ from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
 from tasks import task_ns
 from auth import auth_ns
+from subjects import subject_ns, assessment_ns
 from flask_cors import CORS
 
 def create_app(config):
@@ -22,6 +23,8 @@ def create_app(config):
 
     api.add_namespace(task_ns)
     api.add_namespace(auth_ns)
+    api.add_namespace(subject_ns)
+    api.add_namespace(assessment_ns)
 
     @app.shell_context_processor
     def make_shell_context():

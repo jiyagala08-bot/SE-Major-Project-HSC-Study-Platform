@@ -22,8 +22,49 @@
 </header>
 <main>
 <h1> Profile</h1>
-<ul class ="Login">
-<li><a href="logon.html"> Logout </a></li>
+ <h3>Your Subjects</h3>
+
+  <div>
+  <input id="subject-name" placeholder="Subject name">
+  <select id="subject-priority">
+  <option value="1">Low</option>
+  <option value="2">Medium</option>
+  <option value="3">High</option>
+  </select>
+    <button id="createsub" onclick="createSubject()">Add Subject</button>
+  </div>
+
+  <h3>Subject List</h3>
+  <ul id="subject-list"></ul>
+
+  <h3>Assessments</h3>
+
+  <select id="assessment-subject">
+  <option value="1">Maths</option>
+  <option value="2">English</option>
+  <option value="3">Physics</option>
+  </select>
+
+  <select id="assessment-number">
+  <option value="1">1</option>
+  <option value="2">2</option>
+  <option value="3">3</option>
+  <option value="4">4</option>
+  </select>
+
+  <input id="assessment-weight" type="number" placeholder="Weight %">
+  <input id="assessment-mark" type="number" placeholder="Mark %">
+
+  <button id="addassessment" onclick="createAssessment()">Add Assessment</button>
+
+  <h3>Your Assessments</h3>
+  <ul id="assessment-list"></ul>
+
+  <script src="auth.js"></script>
+  <script src="subjects.js"></script>
+
+  <ul class ="Login">
+  <li><a href="logon.html"> Logout </a></li>
 </main>
 
 </body>

@@ -114,7 +114,7 @@ p{
 }
 
 /* Input fields */
-#signup-email, #signup-username, #signup-password, #signup-cpassword, #task-title, #task-desc, #task-priority, #task-subject{
+#signup-email, #signup-username, #signup-password, #signup-cpassword, #task-title, #task-description, #task-priority, #task-subject, #subject-name, #subject-priority{
   color: #000;
   display: block;
   margin: 10px auto;
@@ -125,7 +125,7 @@ p{
   border: 2px solid #BABF94;
 }
 
-#login-email, #login-username, #login-password{
+#login-email, #login-username, #login-password, #assessment-number, #assessment-weight, #assessment-mark, #assessment-subject {
   color: #000;
   display: block;
   margin: 10px auto;
@@ -147,8 +147,7 @@ p{
   height: 50px;
 }
 
-
-#Add-task, #clear-tasks-btn, #sign-up-btn, #login-btn, #lgout {
+#clear-tasks-btn, #sign-up-btn, #login-btn, #lgout {
   width: 100px;
   height: 50px;
   cursor: pointer;
@@ -164,6 +163,26 @@ p{
   text-align: center;
   margin: 0 auto;
   margin-top: 1rem;
+  margin-bottom: 1.5rem;
+  align-items: center;
+}
+
+#create-task,  #createsub, #addassessment {
+  width: 100px;
+  height: 50px;
+  cursor: pointer;
+  background-color: #B2AC88;
+  color: #FFF;
+  font-weight: bold;
+  font-family: "Playfair Display", serif;
+  font-size: 1rem;
+  border: 2px solid #FFF;
+  border-radius: 10px;
+  padding: 5px 10px;
+  display: block;
+  text-align: center;
+  margin: 0 auto;
+  margin-top: 0rem;
   margin-bottom: 1.5rem;
   align-items: center;
 }

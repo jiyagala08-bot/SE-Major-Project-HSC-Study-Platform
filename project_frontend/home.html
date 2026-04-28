@@ -27,18 +27,29 @@
   <h1>Task Dashboard</h1>
   <h3> Create A Task</h3>
   <!-- Create Task Form -->
-  <div id="create-task">
-    <input id="task-title" placeholder="Task Title">
-    <input id="task-desc" placeholder="Task Description">
-    <input id="task-priority" type="number" placeholder="Priority Level (1–10)">
-    <input id="task-subject" type="number" placeholder="Subject ID">
+  <input id="task-title" placeholder="Task title">
+  <input id="task-description" placeholder="Task description">
 
-    <button id="Add-task" onclick="createTask()">Add Task</button>
-  </div>
+<select id="task-priority">
+  <option value="1">Low</option>
+  <option value="2">Medium</option>
+  <option value="3">High</option>
+</select>
+
+<select id="task-subject">
+  <option value="1">Maths</option>
+  <option value="2">English</option>
+  <option value="3">Physics</option>
+</select>
+
+<button type="submit" id="create-task" onclick="handleCreateTask()">Create Task</button>
 
   <!-- Task List -->
   <div id="task-list"></div>
 
   <button id="lgout" onclick="logoutUser()">Logout</button>
 
+  <script src="auth.js"></script>
   <script src="index.js"></script>
+</body>
+</html>

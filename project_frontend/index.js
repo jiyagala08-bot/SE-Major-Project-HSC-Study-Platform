@@ -1,7 +1,7 @@
 // Service worker
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker
-    .register("/SE-Major-Project-HSC-Study-Platform/project_frontend/service-worker.js")
+    .register("service-worker.js")
     .then(reg => console.log("Service Worker registered:", reg))
     .catch(err => console.error("Service Worker registration failed:", err));
 }
@@ -9,33 +9,55 @@ if ("serviceWorker" in navigator) {
 const BASE_URL = "https://didactic-meme-qvq94rrw99wphq6r-5000.app.github.dev";
 
 function getToken() {
-  return localStorage.getItem("token");
+  return localStorage.getItem("access_token");
 }
 
-// ---------------- TASK CRUD ----------------
-
 async function getTasks() {
+  const token = await getValidAccessToken();
+  if (!token) {
+    console.error("No valid access token available for task fetch");
+    return [];
+  }
+
   const response = await fetch(`${BASE_URL}/tasks/tasks`, {
     method: "GET",
     headers: {
-      "Authorization": `Bearer ${getToken()}`
+      "Authorization": `Bearer ${token}`
     }
   });
 
   if (!response.ok) {
-    console.error("Failed to fetch tasks");
+    const errorText = await response.text();
+    console.error("Failed to fetch tasks", response.status, errorText);
     return [];
   }
 
   return response.json();
 }
 
+function handleCreateTask() {
+  const title = document.getElementById("task-title").value;
+  const description = document.getElementById("task-description").value;
+  const priority_level = parseInt(document.getElementById("task-priority").value);
+  const subject_id = parseInt(document.getElementById("task-subject").value);
+  console.log({ title, description, priority_level, subject_id }); // DEBUG
+  createTask(title, description, priority_level, subject_id)
+    .then(() => loadTasks());
+}
+
+
 async function createTask(title, description, priority_level, subject_id) {
+  const token = await getValidAccessToken();
+  if (!token) {
+    alert("Session expired. Please log in again.");
+    return null;
+  }
+
   const response = await fetch(`${BASE_URL}/tasks/tasks`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${getToken()}`
+      "Authorization": `Bearer ${token}`
     },
     body: JSON.stringify({
       title,
@@ -56,10 +78,16 @@ async function createTask(title, description, priority_level, subject_id) {
 }
 
 async function getTask(id) {
+  const token = await getValidAccessToken();
+  if (!token) {
+    console.error("No valid access token available for getTask");
+    return null;
+  }
+
   const response = await fetch(`${BASE_URL}/tasks/tasks/${id}`, {
     method: "GET",
     headers: {
-      "Authorization": `Bearer ${getToken()}`
+      "Authorization": `Bearer ${token}`
     }
   });
 
@@ -72,11 +100,17 @@ async function getTask(id) {
 }
 
 async function updateTask(id, title, description) {
+  const token = await getValidAccessToken();
+  if (!token) {
+    alert("Session expired. Please log in again.");
+    return null;
+  }
+
   const response = await fetch(`${BASE_URL}/tasks/tasks/${id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${getToken()}`
+      "Authorization": `Bearer ${token}`
     },
     body: JSON.stringify({ title, description })
   });
@@ -92,10 +126,16 @@ async function updateTask(id, title, description) {
 }
 
 async function deleteTask(id) {
+  const token = await getValidAccessToken();
+  if (!token) {
+    alert("Session expired. Please log in again.");
+    return false;
+  }
+
   const response = await fetch(`${BASE_URL}/tasks/tasks/${id}`, {
     method: "DELETE",
     headers: {
-      "Authorization": `Bearer ${getToken()}`
+      "Authorization": `Bearer ${token}`
     }
   });
 
@@ -107,25 +147,29 @@ async function deleteTask(id) {
   return true;
 }
 
-// ---------------- RENDERING ----------------
+async function loadSubjectsIntoSelect() {
+  const token = await getValidAccessToken();
+  if (!token) return;
 
-async function loadTasks() {
-  const tasks = await getTasks();
-  const container = document.getElementById("task-list");
+  const response = await fetch(`${BASE_URL}/subjects/subjects`, {
+    headers: { "Authorization": `Bearer ${token}` }
+  });
 
-  container.innerHTML = "";
+  if (!response.ok) return;
 
-  tasks.forEach(task => {
-    const div = document.createElement("div");
-    div.classList.add("task-item");
+  const subjects = await response.json();
+  const select = document.getElementById("task-subject");
+  select.innerHTML = ""; // Clear existing
 
-    div.innerHTML = `
-      <h3>${task.title}</h3>
-      <p>${task.description}</p>
-      <p>Priority: ${task.priority_level}</p>
-      <button onclick="deleteTask(${task.id}).then(loadTasks)">Delete</button>
-    `;
-
-    container.appendChild(div);
+  subjects.forEach(sub => {
+    const option = document.createElement("option");
+    option.value = sub.id;
+    option.textContent = sub.name;
+    select.appendChild(option);
   });
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+  loadTasks();
+  loadSubjectsIntoSelect();
+});
