@@ -1,6 +1,6 @@
 from flask import request
 from flask_restx import Namespace, Resource, fields
-from models import Subject, Assessment
+from models import Subject, Assessment, User
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from auth import auth_ns
 
@@ -98,14 +98,6 @@ class AssessmentListResource(Resource):
             return {"message": "Subject ID, score and weight are required"}, 400
         new_assessment.save()
         return new_assessment, 201
-
-@auth_ns.route('/refresh')
-class Refresh(Resource):
-    @jwt_required(refresh=True)
-    def post(self):
-        current_user=get_jwt_identity()
-        new_access_token=create_access_token(identity=str(current_user))
-        return jsonify({"access_token":new_access_token}),200
 
 profile_ns=Namespace('Profile', description='A namespace for profiles')
 

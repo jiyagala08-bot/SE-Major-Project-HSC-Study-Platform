@@ -20,7 +20,7 @@ async function signupUser() {
   const data = await response.json();
 
   if (response.ok) {
-    alert("Signup successful! Welcome to your productive double life!");
+    alert("Signup successful! Welcome, " + username);
     document.getElementById("signup-email").value = "";
     document.getElementById("signup-username").value = "";
     document.getElementById("signup-password").value = "";

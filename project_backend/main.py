@@ -4,8 +4,8 @@ from models import Task, User
 from exts import db
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
-from tasks import task_ns
 from auth import auth_ns
+from tasks import task_ns
 from subjects import subject_ns, assessment_ns
 from flask_cors import CORS
 

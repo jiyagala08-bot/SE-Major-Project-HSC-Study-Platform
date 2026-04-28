@@ -15,7 +15,7 @@ class Profile(db.Model):
 
 class Subject(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('profle.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     name = db.Column(db.String, nullable=False)
     assessments = db.relationship('Assessment', backref='subject', lazy=True)
 

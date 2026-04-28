@@ -1,6 +1,5 @@
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from requests import session
-from flask import Flask, request, jsonify, make_response
+from flask import request, jsonify, make_response, current_app
 from flask_restx import Resource, Namespace, fields
 from models import User
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -73,10 +72,9 @@ class Signup(Resource):
             password=generate_password_hash(password)
         )
         new_user.save()
-
-        return make_response(jsonify({"message": "User created successfully"}), 201)
-
-
+        return {
+            "message": "User created successfully. A verification email has been sent."
+        }, 201
 
 @auth_ns.route('/login')
 class Login(Resource):
