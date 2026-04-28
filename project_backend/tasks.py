@@ -13,7 +13,8 @@ task_model = task_ns.model(
         'title': fields.String(),
         'description': fields.String(),
         'priority_level': fields.Integer(),
-        'subject_id': fields.Integer()
+        'subject_id': fields.Integer(),
+        'user_id' : fields.Integer()
     }
 )
 

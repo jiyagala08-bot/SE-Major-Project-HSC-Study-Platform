@@ -33,7 +33,7 @@
     <input id="task-priority" type="number" placeholder="Priority Level (1–10)">
     <input id="task-subject" type="number" placeholder="Subject ID">
 
-    <button id="Add-task" onclick="handleCreateTask()">Add Task</button>
+    <button id="Add-task" onclick="createTask()">Add Task</button>
   </div>
 
   <!-- Task List -->
@@ -42,33 +42,3 @@
   <button id="lgout" onclick="logoutUser()">Logout</button>
 
   <script src="index.js"></script>
-
-  <script>
-    async function handleCreateTask() {
-      const title = document.getElementById("task-title").value;
-      const description = document.getElementById("task-desc").value;
-      const priority = document.getElementById("task-priority").value;
-      const subject = document.getElementById("task-subject").value;
-
-      if (!title || !description) {
-        alert("Title and description are required");
-        return;
-      }
-
-      const created = await createTask(title, description, priority, subject);
-
-      if (created) {
-        document.getElementById("task-title").value = "";
-        document.getElementById("task-desc").value = "";
-        document.getElementById("task-priority").value = "";
-        document.getElementById("task-subject").value = "";
-
-        loadTasks();
-      }
-    }
-
-    loadTasks();
-  </script>
-
-</body>
-</html>

@@ -10,18 +10,26 @@ class Task:
 class Profile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    subjects = db.relationship('Subject', backref='profile', lazy=True)
+    name = db.Column(db.String, nullable=False)
     
 
 class Subject(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    profile_id = db.Column(db.Integer, db.ForeignKey('profile.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('profle.id'))
     name = db.Column(db.String, nullable=False)
     assessments = db.relationship('Assessment', backref='subject', lazy=True)
 
     def calculate_cumulative_score(self):
         total = sum(a.score * (a.weight / 100) for a in self.assessments)
         return total
+    
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
 
 class Assessment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
