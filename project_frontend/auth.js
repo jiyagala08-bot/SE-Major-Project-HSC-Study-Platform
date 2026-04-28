@@ -7,7 +7,7 @@ async function signupUser() {
   const cpassword = document.getElementById("signup-cpassword").value;
 
   if (password !== cpassword) {
-    alert("Passwords do not match");
+    document.getElementById("signup-message").textContent = "Passwords do not match";
     return;
   }
 
@@ -20,7 +20,9 @@ async function signupUser() {
   const data = await response.json();
 
   if (response.ok) {
-    alert("Signup successful! Welcome, " + username);
+    document.getElementById("signup-message").textContent = "";
+    document.getElementById("signup-msg").textContent = "";
+    document.getElementById("signup-msg").textContent = `Signup successful! Welcome, ${username}`;
     document.getElementById("signup-email").value = "";
     document.getElementById("signup-username").value = "";
     document.getElementById("signup-password").value = "";
@@ -28,34 +30,46 @@ async function signupUser() {
     return;
   }
   if (data.message === "Password must be at least 8 characters long") {
-    alert(data.message);
+    document.getElementById("signup-message").textContent = "";
+    document.getElementById("signup-msg").textContent = "";
+    document.getElementById("signup-message").textContent = data.message;
     return;
   }
   if (data.message === "Password must be less than 50 characters long") {
-    alert(data.message);
+    document.getElementById("signup-message").textContent = "";
+    document.getElementById("signup-msg").textContent = "";
+    document.getElementById("signup-message").textContent = data.message;
     return;
   }
   if (data.message === `Invalid email format`) {
-    alert(data.message);
+    document.getElementById("signup-message").textContent = "";
+    document.getElementById("signup-msg").textContent = "";
+    document.getElementById("signup-message").textContent = data.message;
     return;
   }
 
   if (data.message === `Invalid username format`) {
-    alert(data.message);
+    document.getElementById("signup-message").textContent = "";
+    document.getElementById("signup-msg").textContent = "";
+    document.getElementById("signup-message").textContent = data.message;
     return;
   }
 
   if (data.message === `Password must contain at least one letter, number, and special character`) {
-    alert(data.message);
+    document.getElementById("signup-message").textContent = "";
+    document.getElementById("signup-msg").textContent = "";
+    document.getElementById("signup-message").textContent = data.message;
     return;
   }
 
   if (data.message === `User with username ${username} or email ${email} already exists`) {
-    alert(data.message);
+    document.getElementById("signup-message").textContent = "";
+    document.getElementById("signup-msg").textContent = "";
+    document.getElementById("signup-message").textContent = data.message;
     return;
   }
 
-  alert(data.message || "An unexpected error occurred. Please try again.");
+  document.getElementById("signup-message").textContent = data.message || "An unexpected error occurred. Please try again.";
 }
 
 async function loginUser() {
@@ -73,23 +87,27 @@ async function loginUser() {
   const data = await response.json();
 
   if (response.ok) {
+    document.getElementById("login-message").textContent = "";
+    document.getElementById("login-msg").textContent = "";
     localStorage.setItem("access_token", data.access_token);
     localStorage.setItem("refresh_token", data.refresh_token);
-    alert("Login successful");
+    document.getElementById("login-msg").textContent = `Login successful! Welcome back, ${username}`;
     document.getElementById("login-username").value = "";
     document.getElementById("login-password").value = "";
     return;
   }
 
   if (response.status === 401) {
-    alert(data.message || "Invalid username or password");
+    document.getElementById("login-message").textContent = "";
+    document.getElementById("login-msg").textContent = "";
+    document.getElementById("login-message").textContent = data.message || "Invalid username or password";
   }
 }
 
 async function logoutUser() {
   localStorage.removeItem("access_token");
   localStorage.removeItem("refresh_token");
-  alert("Logged out");
+  document.getElementById("login-message").textContent = "Logged out";
   window.location.href = "/logon.html";
 }
 
@@ -114,7 +132,7 @@ async function getValidAccessToken() {
   const data = await refreshResponse.json();
 
   if (!refreshResponse.ok) {
-    alert("Session expired. Please log in again.");
+    document.getElementById("login-message").textContent = "Session expired. Please log in again.";
     localStorage.clear();
     window.location.href = "/logon.html";
     return null;

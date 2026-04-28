@@ -187,6 +187,12 @@ p{
   align-items: center;
 }
 
+#signup-message, #signup-msg, #login-message, #login-msg {
+  text-align: center;
+  font-size: 1rem;
+  margin-top: 10px;
+}
+
 .login {
   list-style: none;
   display: flex; 
