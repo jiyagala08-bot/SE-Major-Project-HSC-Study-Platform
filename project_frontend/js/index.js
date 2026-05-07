@@ -70,7 +70,7 @@ async function createTask(title, description, priority_level, subject_id) {
   const data = await response.json();
 
   if (!response.ok) {
-    document.getElementById("task-message").textContent = data.message || "Task created";
+    document.getElementById("task-failmessage").textContent = data.message || "Task creation failed";
     return null;
   }
 
