@@ -6,7 +6,7 @@ from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
 from auth import auth_ns
 from tasks import task_ns
-from subjects import subject_ns, assessment_ns
+from project_backend.subjects_and_assmnts import subject_ns, assessment_ns
 from flask_cors import CORS
 
 def create_app(config):
@@ -33,4 +33,9 @@ def create_app(config):
             "Task":Task,
             "User":User
         }
+    
+    """Adds a global error handler to catch all exceptions and return a JSON response with the error message and appropriate status code."""
+    @app.errorhandler(Exception)
+    def handle_error(e):
+        return jsonify({"message": str(e)}), getattr(e, "code", 500)
     return app

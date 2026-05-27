@@ -1,6 +1,6 @@
 from flask import request
 from flask_restx import Namespace, Resource, fields
-from models import Subject, Assessment, User
+from models import Subject, PublicSubject, PublicSubjectUser, Assessment, User
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from auth import auth_ns
 
@@ -11,7 +11,7 @@ subject_model = subject_ns.model(
     {
         'id': fields.Integer(),
         'name': fields.String(),
-        'priority_level': fields.Integer(),
+        'difficulty_level' : fields.Integer(),
         'user_id' : fields.Integer()
     }
 )
@@ -34,7 +34,7 @@ class SubjectListResource(Resource):
 
         new_subject = Subject(
             name=data['name'],
-            priority_level=data.get('priority_level', 1),
+            difficulty_level=data.get('difficulty_level', 1),
             user_id=current_user
         )
 
@@ -70,7 +70,9 @@ assessment_model = assessment_ns.model(
         'id': fields.Integer(),
         'subject_id': fields.Integer(),
         'score': fields.Float(),
-        'weight' : fields.Float()
+        'total_score' : fields.Float(),
+        'weight' : fields.Float(),
+        'due_date' : fields.DateTime()
     }
 )
 
@@ -92,10 +94,12 @@ class AssessmentListResource(Resource):
         new_assessment=Assessment(
             subject_id=data.get('subject_id'),
             score=data.get('score'),
-            weight=data.get('weight')
+            total_score=data.get('total_score'),
+            weight=data.get('weight'),
+            due_date=data.get('due_date')
         )
-        if new_assessment.subject_id is None or new_assessment.score is None or new_assessment.weight is None:
-            return {"message": "Subject ID, score and weight are required"}, 400
+        if new_assessment.subject_id is None or new_assessment.score is None or new_assessment.total_score is None or new_assessment.weight is None:
+            return {"message": "Subject ID, score, total score and weight are required"}, 400
         new_assessment.save()
         return new_assessment, 201
 
@@ -109,25 +113,3 @@ profile_model = profile_ns.model(
         'name': fields.String(),
     }
 )
-@profile_ns.route('/me')
-class Profile(Resource):
-    @jwt_required()
-    def get(self):
-        user_id = get_jwt_identity()
-
-        user = User.query.get_or_404(user_id)
-        subjects = Subject.query.filter_by(user_id=user_id).all()
-
-        return {
-            "username": user.username,
-            "email": user.email,
-            "subjects": [
-                {
-                    "id": s.id,
-                    "name": s.name,
-                    "priority_level": s.priority_level
-                }
-                for s in subjects
-            ]
-        }
-

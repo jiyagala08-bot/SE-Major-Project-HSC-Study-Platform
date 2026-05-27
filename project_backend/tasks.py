@@ -3,6 +3,7 @@ from flask_restx import Namespace, Resource, fields
 from models import Task
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from auth import auth_ns
+from sqlalchemy.orm import defer
 
 task_ns=Namespace('tasks', description='A namespace for tasks')
 
@@ -31,7 +32,8 @@ class TaskListResource(Resource): #unneeded
     def get(self):
         """Get all tasks"""
         current_user=get_jwt_identity()
-        tasks = Task.query.filter_by(user_id=current_user) \
+        tasks = Task.query.options(defer(Task.subject)) \
+                          .filter_by(user_id=current_user) \
                           .order_by(Task.priority_level.desc()) \
                           .all()
         return tasks
@@ -47,7 +49,8 @@ class TaskListResource(Resource): #unneeded
             title=data.get('title'),
             description=data.get('description'),
             priority_level=data.get('priority_level'),
-            subject_id=data.get('subject_id')
+            subject_id=data.get('subject_id'),
+            user_id=current_user
         )
         if new_task.title is None or new_task.description is None:
             return {"message":"Title and description are required"},400
@@ -61,7 +64,9 @@ class TaskResource(Resource):
     def get(self, id):
         """Get a task by id"""
         current_user=get_jwt_identity()
-        return Task.query.get_or_404(id)
+        task = Task.query.get_or_404(id)
+        task.subject = None
+        return task
 
     @task_ns.marshal_with(task_model)
     @jwt_required()
@@ -71,6 +76,7 @@ class TaskResource(Resource):
         task_to_update=Task.query.get_or_404(id)
         data=request.get_json()
         task_to_update.update(data.get('title'),data.get('description'))
+        task_to_update.subject = None
         return task_to_update
 
     @task_ns.marshal_with(task_model)
@@ -80,4 +86,5 @@ class TaskResource(Resource):
         current_user=get_jwt_identity()
         task_to_delete=Task.query.get_or_404(id)
         task_to_delete.delete()
+        task_to_delete.subject = None
         return task_to_delete

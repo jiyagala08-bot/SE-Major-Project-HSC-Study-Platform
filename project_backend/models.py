@@ -1,5 +1,7 @@
+from os import times
 from exts import db
 from sqlalchemy import CheckConstraint
+from datetime import date
 
 """
 class Task:
@@ -7,22 +9,37 @@ class Task:
     title:str
     description:str
 """
+class PublicSubject(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String, nullable=False)
+    description = db.Column(db.Text, nullable=False)
+
 class Profile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     name = db.Column(db.String, nullable=False)
-    
+    optimal_study_time = db.Column(db.Integer, CheckConstraint('optimal_study_time >= 1 AND optimal_study_time <= 4'), nullable=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), unique=True, nullable=False)
+    user = db.relationship("User", back_populates="profile")
+
+class UserPublicSubject(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    public_subject_id = db.Column(db.Integer, db.ForeignKey('public_subject.id'))
 
 class Subject(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     name = db.Column(db.String, nullable=False)
+    public_subject_id = db.Column(db.Integer, db.ForeignKey('public_subject.id'), nullable=True)
+    difficulty_level = db.Column(db.Integer, CheckConstraint('difficulty_level >= 1 AND difficulty_level <= 10'), nullable=True)
     assessments = db.relationship('Assessment', backref='subject', lazy=True)
+    user = db.relationship('User', backref='subjects')
+    public_subject = db.relationship('PublicSubject', backref='private_subjects')
 
     def calculate_cumulative_score(self):
-        total = sum(a.score * (a.weight / 100) for a in self.assessments)
+        total = sum((a.score / a.total_score) * a.weight for a in self.assessments)
         return total
-    
+
     def delete(self):
         db.session.delete(self)
         db.session.commit()
@@ -34,21 +51,21 @@ class Subject(db.Model):
 class Assessment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     subject_id = db.Column(db.Integer, db.ForeignKey('subject.id'))
-    score = db.Column(db.Float, nullable=False)
-    weight = db.Column(db.Float, nullable=False)
-
+    score = db.Column(db.Float, nullable=True)
+    total_score = db.Column(db.Float, CheckConstraint('total_score > 0 AND score <= total_score'), nullable=True)
+    weight = db.Column(db.Float, CheckConstraint('weight >= 0 AND weight <= 100'), nullable=True)
+    due_date = db.Column(db.DateTime,nullable=False)
 
 class Task(db.Model):
     id=db.Column(db.Integer(),primary_key=True)
     title=db.Column(db.String(),nullable=False)
     description=db.Column(db.Text(), nullable=False)
     priority_level=db.Column(db.Integer(), CheckConstraint('priority_level >= 1 AND priority_level <= 10'), nullable=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    # Foreign key to Subject
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), unique=True, nullable=False)
     subject_id = db.Column(db.Integer, db.ForeignKey('subject.id'), nullable=True)
-
     # ORM relationship
     subject = db.relationship('Subject', backref='tasks')
+    due_date = db.Column(db.Date, nullable=False)
 
     def __repr__(self):
         return f"<Task {self.title}>"
@@ -70,6 +87,54 @@ class Task(db.Model):
             self.subject_id = subject_id
         if subject is not None:
             self.subject = subject
+    
+    def days_left(self):
+        return (self.due_date - date.today()).days
+    
+    def days_left_score(self):
+        """Return a 1-10 score based on days left until `due_date`.
+        Values below 0 return 0.
+        """
+        d = self.days_left()
+        if d < 0:
+            return 0
+        if d <= 2:
+            return 1
+        elif d <= 4:
+            return 2
+        elif d == 5:
+            return 3
+        elif d == 6:
+            return 4
+        elif d == 7:
+            return 5
+        elif d <= 9:
+            return 6
+        elif d <= 11:
+            return 7
+        elif d <= 14:
+            return 8
+        elif d <= 19:
+            return 9
+        else:
+            return 10
+
+    #def calculate_timeinput_score(timeinput):
+    #in hrs
+    #if 3 or less =1
+    #if 4 =2
+    #5 is 3
+    #6 is 4
+    #7-8 is 5
+    #9-10 is 6
+    #11-12 is 7
+    #13-15 is 8
+    #16-18 is 9
+    #more than 18 is 10
+
+    #def readyscore(self, priority_level=5, self.difficulty_level=5, daysleft_score, timeinput_score, subject_cumulativescore)
+    #sum(priority_level + self.difficulty_level, daysleft_score*0.5, timeinput_score*0.5, subject_cumulativescore)
+    #readyscore = (sum/40) + '%' to 2d.p.
 
 #user model
 
@@ -86,10 +151,17 @@ class User(db.Model):
     username=db.Column(db.String(25),nullable=False,unique=True)
     email=db.Column(db.String(80),nullable=True)
     password=db.Column(db.Text(),nullable=False)
+    role = db.Column(db.String(), nullable=False, default='user')
+    profile = db.relationship("Profile", back_populates="user", uselist=False)
 
     def __repr__(self):
         return f"<User {self.username}>"
     
     def save(self):
         db.session.add(self)
+        db.session.commit()
+
+    def create_profile(self):
+        profile = Profile(user_id=self.user_id, name=self.username, optimal_study_time=1)  # Default optimal study time
+        db.session.add(profile)
         db.session.commit()

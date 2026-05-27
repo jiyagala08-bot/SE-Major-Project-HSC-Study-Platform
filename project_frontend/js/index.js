@@ -1,11 +1,3 @@
-// Service worker
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker
-    .register("service-worker.js")
-    .then(reg => console.log("Service Worker registered:", reg))
-    .catch(err => console.error("Service Worker registration failed:", err));
-}
-
 const BASE_URL = "https://didactic-meme-qvq94rrw99wphq6r-5000.app.github.dev";
 
 function getToken() {
@@ -16,6 +8,8 @@ async function getTasks() {
   const token = await getValidAccessToken();
   if (!token) {
     console.error("No valid access token available for task fetch");
+    // Redirect to login so user can re-authenticate
+    window.location.href = "/project_frontend/html/logon.html";
     return [];
   }
 
@@ -50,6 +44,7 @@ async function createTask(title, description, priority_level, subject_id) {
   const token = await getValidAccessToken();
   if (!token) {
     alert("Session expired. Please log in again.");
+    window.location.href = "/project_frontend/html/logon.html";
     return null;
   }
 
@@ -77,7 +72,17 @@ async function createTask(title, description, priority_level, subject_id) {
   document.getElementById("task-message").textContent = "Task created successfully!";
   return data;
 }
+async function loadTasks() {
+  const tasks = await getTasks();
+  const list = document.getElementById("task-list");
+  list.innerHTML = "";
 
+  tasks.forEach(task => {
+    const item = document.createElement("div");
+    item.textContent = task.title;
+    list.appendChild(item);
+  });
+}
 async function getTask(id) {
   const token = await getValidAccessToken();
   if (!token) {
@@ -150,7 +155,10 @@ async function deleteTask(id) {
 
 async function loadSubjectsIntoSelect() {
   const token = await getValidAccessToken();
-  if (!token) return;
+  if (!token) {
+    window.location.href = "/project_frontend/html/logon.html";
+    return;
+  }
 
   const response = await fetch(`${BASE_URL}/subjects/subjects`, {
     headers: { "Authorization": `Bearer ${token}` }
@@ -171,6 +179,15 @@ async function loadSubjectsIntoSelect() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  // Debug: print current token state
+  try {
+    console.log('DEBUG tokens on load', {
+      access: localStorage.getItem('access_token'),
+      refresh: localStorage.getItem('refresh_token')
+    });
+  } catch (e) {
+    console.warn('Unable to read localStorage for debug');
+  }
   loadTasks();
   loadSubjectsIntoSelect();
 });

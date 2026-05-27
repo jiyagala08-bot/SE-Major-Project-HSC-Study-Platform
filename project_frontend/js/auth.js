@@ -18,6 +18,7 @@ async function signupUser() {
   });
 
   const data = await response.json();
+  console.log('Login response', { status: response.status, body: data });
 
   if (response.ok) {
     document.getElementById("signup-message").textContent = "";
@@ -94,6 +95,7 @@ async function loginUser() {
     document.getElementById("login-msg").textContent = `Login successful! Welcome back, ${username}`;
     document.getElementById("login-username").value = "";
     document.getElementById("login-password").value = "";
+    window.location.href = "/project_frontend/html/home.html";
     return;
   }
 
@@ -108,37 +110,51 @@ async function logoutUser() {
   localStorage.removeItem("access_token");
   localStorage.removeItem("refresh_token");
   document.getElementById("login-message").textContent = "Logged out";
-  window.location.href = "/logon.html";
+  window.location.href = "/project_frontend/html/logon.html";
 }
 
 async function getValidAccessToken() {
   let access = localStorage.getItem("access_token");
   const refresh = localStorage.getItem("refresh_token");
 
-  // Try using the current access token
-  const test = await fetch("https://didactic-meme-qvq94rrw99wphq6r-5000.app.github.dev/tasks/tasks", {
-    headers: { "Authorization": "Bearer " + access }
-  });
-
-  // If access token is still valid → return it
-  if (test.status !== 401) return access;
-
-  // Otherwise refresh it
-  const refreshResponse = await fetch("https://didactic-meme-qvq94rrw99wphq6r-5000.app.github.dev/auth/refresh", {
-    method: "POST",
-    headers: { "Authorization": "Bearer " + refresh }
-  });
-
-  const data = await refreshResponse.json();
-
-  if (!refreshResponse.ok) {
-    document.getElementById("login-message").textContent = "Session expired. Please log in again.";
-    localStorage.clear();
-    window.location.href = "/logon.html";
+  // If there's no refresh token, signal caller to redirect/login
+  if (!refresh) {
     return null;
   }
 
-  // Save new access token
-  localStorage.setItem("access_token", data.access_token);
-  return data.access_token;
+  if (!access) {
+    return await refreshAccessToken(refresh);
+  }
+
+  // If we have an access token, return it and let callers handle failed requests.
+  return access;
+}
+
+async function refreshAccessToken(refresh) {
+  try {
+    const refreshResponse = await fetch("https://didactic-meme-qvq94rrw99wphq6r-5000.app.github.dev/auth/refresh", {
+      method: "POST",
+      headers: { "Authorization": "Bearer " + refresh }
+    });
+
+    const text = await refreshResponse.text();
+    let data = null;
+    try {
+      data = JSON.parse(text);
+    } catch (e) {
+      console.warn('Refresh response is not JSON', text);
+    }
+    console.log('Refresh response', { status: refreshResponse.status, body: data || text });
+
+    if (!refreshResponse.ok) {
+      // Let caller handle logout/redirect; return null to indicate failure
+      return null;
+    }
+
+    localStorage.setItem("access_token", data.access_token);
+    return data.access_token;
+  } catch (e) {
+    console.error('Refresh token request failed', e);
+    return null;
+  }
 }
