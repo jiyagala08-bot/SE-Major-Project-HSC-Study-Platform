@@ -15,6 +15,14 @@ subject_model = subject_ns.model(
         'user_id' : fields.Integer()
     }
 )
+subject_input = subject_ns.model(
+    'SubjectInput',
+    {
+        'name': fields.String(required=True),
+        'difficulty_level': fields.Integer()
+    }
+)
+
 @subject_ns.route('/subjects')
 class SubjectListResource(Resource):
     @jwt_required()
@@ -27,7 +35,7 @@ class SubjectListResource(Resource):
                           .all()
         return subjects
     @jwt_required()
-    @subject_ns.expect(subject_model)
+    @subject_ns.expect(subject_input)
     def post(self):
         current_user = get_jwt_identity()
         data = request.get_json()
@@ -35,7 +43,8 @@ class SubjectListResource(Resource):
         new_subject = Subject(
             name=data['name'],
             difficulty_level=data.get('difficulty_level', 1),
-            user_id=current_user
+            user_id=current_user,
+            due_date=data.get('due_date')
         )
 
         new_subject.save()
@@ -51,8 +60,7 @@ class SubjectResource(Resource):
         current_user=get_jwt_identity()
         subject = Subject.query.filter_by(id=id, user_id=current_user).first_or_404()
         subject.delete()
-        return subject, 200
-    @subject_ns.marshal_with(subject_model)
+        return {"message": "Subject deleted", "id": id}, 200
     @jwt_required()
     def calculate(self, id):
         """Calculate the cumulative weighted mark for a subject"""
@@ -62,7 +70,7 @@ class SubjectResource(Resource):
         return {"cumulative_score": cumulative_score}, 200
     
 
-assessment_ns=Namespace('Assessment', description='A namespace for assessments')
+assessment_ns=Namespace('assessments', description='A namespace for assessments')
 
 assessment_model = assessment_ns.model(
     'Assessment',
@@ -75,6 +83,17 @@ assessment_model = assessment_ns.model(
         'due_date' : fields.DateTime()
     }
 )
+assessment_input = assessment_ns.model(
+    'AssessmentInput',
+    {
+        'subject_id': fields.Integer(required=True),
+        'score': fields.Float(required=True),
+        'total_score': fields.Float(required=True),
+        'weight': fields.Float(required=True),
+        'due_date': fields.String()  # ISO string, not DateTime()
+    }
+)
+
 
 @assessment_ns.route('/assessments')
 class AssessmentListResource(Resource):
@@ -86,7 +105,7 @@ class AssessmentListResource(Resource):
         assessments = Assessment.query.join(Subject).filter(Subject.user_id == current_user).all()
         return assessments
     @jwt_required()
-    @assessment_ns.expect(assessment_model)
+    @assessment_ns.expect(assessment_input)
     def post(self):
         """Create a new assessment"""
         current_user=get_jwt_identity()
@@ -98,12 +117,15 @@ class AssessmentListResource(Resource):
             weight=data.get('weight'),
             due_date=data.get('due_date')
         )
-        if new_assessment.subject_id is None or new_assessment.score is None or new_assessment.total_score is None or new_assessment.weight is None:
+        subject = Subject.query.filter_by(id=data['subject_id'], user_id=current_user).first()
+        if not subject:
+            return {"message": "Invalid subject_id"}, 403
+        elif new_assessment.subject_id is None or new_assessment.score is None or new_assessment.total_score is None or new_assessment.weight is None:
             return {"message": "Subject ID, score, total score and weight are required"}, 400
         new_assessment.save()
         return new_assessment, 201
 
-profile_ns=Namespace('Profile', description='A namespace for profiles')
+profile_ns=Namespace('profiles', description='A namespace for profiles')
 
 profile_model = profile_ns.model(
     'Profile',

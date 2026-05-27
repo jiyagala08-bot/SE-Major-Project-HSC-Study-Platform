@@ -55,6 +55,7 @@ class Assessment(db.Model):
     total_score = db.Column(db.Float, CheckConstraint('total_score > 0 AND score <= total_score'), nullable=True)
     weight = db.Column(db.Float, CheckConstraint('weight >= 0 AND weight <= 100'), nullable=True)
     due_date = db.Column(db.DateTime,nullable=False)
+    ready_score = db.Column(db.Float, default=False)
 
 class Task(db.Model):
     id=db.Column(db.Integer(),primary_key=True)
@@ -118,23 +119,6 @@ class Task(db.Model):
             return 9
         else:
             return 10
-
-    #def calculate_timeinput_score(timeinput):
-    #in hrs
-    #if 3 or less =1
-    #if 4 =2
-    #5 is 3
-    #6 is 4
-    #7-8 is 5
-    #9-10 is 6
-    #11-12 is 7
-    #13-15 is 8
-    #16-18 is 9
-    #more than 18 is 10
-
-    #def readyscore(self, priority_level=5, self.difficulty_level=5, daysleft_score, timeinput_score, subject_cumulativescore)
-    #sum(priority_level + self.difficulty_level, daysleft_score*0.5, timeinput_score*0.5, subject_cumulativescore)
-    #readyscore = (sum/40) + '%' to 2d.p.
 
 #user model
 
