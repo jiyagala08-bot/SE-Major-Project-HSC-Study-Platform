@@ -1,4 +1,4 @@
-const BASE_URL = "https://didactic-meme-qvq94rrw99wphq6r-5000.app.github.dev";
+const TASKS_API = "https://psychic-space-funicular-q7pvrx4j7xv249v9-5000.app.github.dev";
 
 function getToken() {
   return localStorage.getItem("access_token");
@@ -13,7 +13,7 @@ async function getTasks() {
     return [];
   }
 
-  const response = await fetch(`${BASE_URL}/tasks/tasks`, {
+  const response = await fetch(`${TASKS_API}/tasks`, {
     method: "GET",
     headers: {
       "Authorization": `Bearer ${token}`
@@ -48,7 +48,7 @@ async function createTask(title, description, priority_level, subject_id) {
     return null;
   }
 
-  const response = await fetch(`${BASE_URL}/tasks/tasks`, {
+  const response = await fetch(`${TASKS_API}/tasks`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -90,7 +90,7 @@ async function getTask(id) {
     return null;
   }
 
-  const response = await fetch(`${BASE_URL}/tasks/tasks/${id}`, {
+  const response = await fetch(`${TASKS_API}/tasks/${id}`, {
     method: "GET",
     headers: {
       "Authorization": `Bearer ${token}`
@@ -112,7 +112,7 @@ async function updateTask(id, title, description) {
     return null;
   }
 
-  const response = await fetch(`${BASE_URL}/tasks/tasks/${id}`, {
+  const response = await fetch(`${TASKS_API}/tasks/${id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -138,7 +138,7 @@ async function deleteTask(id) {
     return false;
   }
 
-  const response = await fetch(`${BASE_URL}/tasks/tasks/${id}`, {
+  const response = await fetch(`${TASKS_API}/tasks/${id}`, {
     method: "DELETE",
     headers: {
       "Authorization": `Bearer ${token}`
@@ -160,7 +160,7 @@ async function loadSubjectsIntoSelect() {
     return;
   }
 
-  const response = await fetch(`${BASE_URL}/subjects/subjects`, {
+  const response = await fetch(`${TASKS_API}/subjects/subjects`, {
     headers: { "Authorization": `Bearer ${token}` }
   });
 

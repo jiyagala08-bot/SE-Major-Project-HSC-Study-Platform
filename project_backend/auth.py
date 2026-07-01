@@ -1,10 +1,10 @@
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from flask import request, jsonify, make_response, current_app
+from flask import request
 from flask_restx import Resource, Namespace, fields
-from models import User
+from project_backend.models import User
+from project_backend.exts import db
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token, create_refresh_token
-from exts import db
 import re
 
 auth_ns = Namespace('auth', description='Authentication related operations')
@@ -35,11 +35,11 @@ PASSWORD_REGEX = r"^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+]).{8,50}$"
 class Signup(Resource):
     @auth_ns.expect(signup_model)
     def post(self):
-        data = request.get_json()
+        data = request.get_json() or {}
 
-        username = data.get('username')
-        email = data.get('email')
-        password = data.get('password')
+        username = (data.get('username') or "").strip()
+        email = (data.get('email') or '').strip()
+        password = data.get('password') or ''
 
         # LENGTH CHECKS
         if len(password) < 8:
@@ -56,13 +56,14 @@ class Signup(Resource):
             return {"message": "Invalid username format"}, 400
 
         if not re.match(PASSWORD_REGEX, password):
-            return {"message": "Password must contain letters, numbers, and special characters"}, 400
+            return {"message": "Password must contain at least one letter, number, and special character"}, 400
 
         # DUPLICATE CHECKS
-        db_email = User.query.filter_by(email=email).first()
-        db_user = User.query.filter_by(username=username).first()
+        existing_user = User.query.filter(
+            (User.email == email) | (User.username == username)
+        ).first()
 
-        if db_user or db_email:
+        if existing_user:
             return {"message": f"User with username {username} or email {email} already exists"}, 400
 
         # CREATE USER
@@ -81,18 +82,20 @@ class Signup(Resource):
 class Login(Resource):
     @auth_ns.expect(login_model)
     def post(self):
-        data = request.get_json()
+        data = request.get_json() or {}
+        username = (data.get('username') or '').strip()
+        password = data.get('password') or ''
 
-        if not re.match(USERNAME_REGEX, data['username']):
+        if not re.match(USERNAME_REGEX, username):
             return {"message": "Invalid username format"}, 400
 
-        db_user = User.query.filter_by(username=data['username']).first()
+        db_user = User.query.filter_by(username=username).first()
 
-        if db_user is None or not check_password_hash(db_user.password, data['password']):
+        if db_user is None or not check_password_hash(db_user.password, password):
             return {"message": "Invalid username or password"}, 401
 
-        access_token = create_access_token(identity=db_user.id)
-        refresh_token = create_refresh_token(identity=db_user.id)
+        access_token = create_access_token(identity=str(db_user.id))
+        refresh_token = create_refresh_token(identity=str(db_user.id))
 
         return {
             "message": "User logged in",

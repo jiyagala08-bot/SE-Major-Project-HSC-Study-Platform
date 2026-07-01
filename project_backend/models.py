@@ -1,5 +1,4 @@
-from os import times
-from exts import db
+from project_backend.exts import db
 from sqlalchemy import CheckConstraint
 from datetime import date
 
@@ -18,7 +17,7 @@ class Profile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
     optimal_study_time = db.Column(db.Integer, CheckConstraint('optimal_study_time >= 1 AND optimal_study_time <= 4'), nullable=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), unique=True, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user = db.relationship("User", back_populates="profile")
 
 class UserPublicSubject(db.Model):
@@ -57,12 +56,20 @@ class Assessment(db.Model):
     due_date = db.Column(db.DateTime,nullable=False)
     ready_score = db.Column(db.Float, default=False)
 
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
 class Task(db.Model):
     id=db.Column(db.Integer(),primary_key=True)
     title=db.Column(db.String(),nullable=False)
     description=db.Column(db.Text(), nullable=False)
     priority_level=db.Column(db.Integer(), CheckConstraint('priority_level >= 1 AND priority_level <= 10'), nullable=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), unique=True, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     subject_id = db.Column(db.Integer, db.ForeignKey('subject.id'), nullable=True)
     # ORM relationship
     subject = db.relationship('Subject', backref='tasks')
@@ -133,7 +140,7 @@ class User:
 class User(db.Model):
     id=db.Column(db.Integer(),primary_key=True)
     username=db.Column(db.String(25),nullable=False,unique=True)
-    email=db.Column(db.String(80),nullable=True)
+    email=db.Column(db.String(80), nullable=False, unique=True)
     password=db.Column(db.Text(),nullable=False)
     role = db.Column(db.String(), nullable=False, default='user')
     profile = db.relationship("Profile", back_populates="user", uselist=False)
@@ -146,6 +153,6 @@ class User(db.Model):
         db.session.commit()
 
     def create_profile(self):
-        profile = Profile(user_id=self.user_id, name=self.username, optimal_study_time=1)  # Default optimal study time
+        profile = Profile(user_id=self.id, name=self.username, optimal_study_time=1)  # Default optimal study time
         db.session.add(profile)
         db.session.commit()

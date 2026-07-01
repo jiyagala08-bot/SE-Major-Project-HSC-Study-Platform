@@ -1,9 +1,9 @@
 from flask import request
 from flask_restx import Namespace, Resource, fields
-from models import Profile
+from project_backend.models import Profile
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
-from auth import auth_ns
-from exts import db
+from project_backend.auth import auth_ns
+from project_backend.exts import db
 
 profile_ns = Namespace('profile', description='Profile related operations')
 

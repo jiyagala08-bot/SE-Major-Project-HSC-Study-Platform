@@ -1,3 +1,5 @@
+const AUTH_API = "https://psychic-space-funicular-q7pvrx4j7xv249v9-5000.app.github.dev";
+
 async function signupUser() {
   if (!document.getElementById("signup-email")) return;
 
@@ -11,7 +13,7 @@ async function signupUser() {
     return;
   }
 
-  const response = await fetch("https://didactic-meme-qvq94rrw99wphq6r-5000.app.github.dev/auth/signup", {
+  const response = await fetch(`${AUTH_API}/auth/signup`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, username, password })
@@ -23,7 +25,12 @@ async function signupUser() {
   if (response.ok) {
     document.getElementById("signup-message").textContent = "";
     document.getElementById("signup-msg").textContent = "";
-    document.getElementById("signup-msg").textContent = `Signup successful! Welcome, ${username}`;
+    document.getElementById("signup-msg").textContent = `Signup successful! Welcome, ${username}. Please log in.`;
+
+    setTimeout(() => {
+      window.location.href = "/project_frontend/html/logon.html";
+    }, 1000);
+    
     document.getElementById("signup-email").value = "";
     document.getElementById("signup-username").value = "";
     document.getElementById("signup-password").value = "";
@@ -79,7 +86,7 @@ async function loginUser() {
   const username = document.getElementById("login-username").value;
   const password = document.getElementById("login-password").value;
 
-  const response = await fetch("https://didactic-meme-qvq94rrw99wphq6r-5000.app.github.dev/auth/login", {
+  const response = await fetch(`${AUTH_API}/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, password })
@@ -109,7 +116,8 @@ async function loginUser() {
 async function logoutUser() {
   localStorage.removeItem("access_token");
   localStorage.removeItem("refresh_token");
-  document.getElementById("login-message").textContent = "Logged out";
+  const msg = document.getElementById("login-message");
+  if (msg) msg.textContent = "Logged out";
   window.location.href = "/project_frontend/html/logon.html";
 }
 
@@ -132,7 +140,7 @@ async function getValidAccessToken() {
 
 async function refreshAccessToken(refresh) {
   try {
-    const refreshResponse = await fetch("https://didactic-meme-qvq94rrw99wphq6r-5000.app.github.dev/auth/refresh", {
+    const refreshResponse = await fetch(`${AUTH_API}/auth/refresh`, {
       method: "POST",
       headers: { "Authorization": "Bearer " + refresh }
     });
@@ -152,6 +160,7 @@ async function refreshAccessToken(refresh) {
     }
 
     localStorage.setItem("access_token", data.access_token);
+    if (data.refresh_token) localStorage.setItem("refresh_token", data.refresh_token);
     return data.access_token;
   } catch (e) {
     console.error('Refresh token request failed', e);

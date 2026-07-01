@@ -1,17 +1,17 @@
 from flask import Flask, jsonify
 from flask_restx import Api,Resource,fields
-from models import Task, User
-from exts import db
+from project_backend.models import Task, User
+from project_backend.exts import db
+from project_backend.auth import auth_ns
+from project_backend.tasks import task_ns
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
-from auth import auth_ns
-from tasks import task_ns
 from project_backend.subjects_and_assmnts import subject_ns, assessment_ns
 from flask_cors import CORS
 
 def create_app(config):
     app=Flask(__name__)
-    CORS(app)
+    CORS(app, resources={r"/*": {"origins": "*"}})
     app.config.from_object(config)
 
     db.init_app(app)
@@ -35,7 +35,7 @@ def create_app(config):
         }
     
     """Adds a global error handler to catch all exceptions and return a JSON response with the error message and appropriate status code."""
-    @app.errorhandler(Exception)
-    def handle_error(e):
-        return jsonify({"message": str(e)}), getattr(e, "code", 500)
+    #@app.errorhandler(Exception)
+    #def handle_error(e):
+        #return jsonify({"message": str(e)}), getattr(e, "code", 500)
     return app

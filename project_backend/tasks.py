@@ -1,8 +1,10 @@
 from flask import request
 from flask_restx import Namespace, Resource, fields
-from models import Task
+from project_backend.models import Task
+from project_backend.exts import db
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy.orm import noload
+from datetime import date
 
 task_ns = Namespace('tasks', description='A namespace for tasks')
 
@@ -64,7 +66,8 @@ class TaskListResource(Resource):
             description=description,
             priority_level=data.get('priority_level'),
             subject_id=data.get('subject_id'),
-            user_id=current_user
+            user_id=current_user,
+            due_date=date.today()
         )
         new_task.save()
         return new_task, 201

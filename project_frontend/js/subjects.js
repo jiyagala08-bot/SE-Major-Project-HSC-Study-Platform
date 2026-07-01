@@ -1,9 +1,21 @@
-const API = "https://didactic-meme-qvq94rrw99wphq6r-5000.app.github.dev";
+const SUBJECTS_API = "https://psychic-space-funicular-q7pvrx4j7xv249v9-5000.app.github.dev";
+
+function requireLogin() {
+  const token = localStorage.getItem("access_token");
+
+  if (!token) {
+    alert("Please log in first.");
+    window.location.href = "/project_frontend/html/logon.html";
+    return false;
+  }
+
+  return true;
+}
 
 async function loadSubjects() {
   const token = await getValidAccessToken();
 
-  const res = await fetch(`${API}/subjects/subjects`, {
+  const res = await fetch(`${SUBJECTS_API}/subjects/subjects`, {
     headers: { "Authorization": "Bearer " + token }
   });
 
@@ -18,7 +30,7 @@ async function loadSubjects() {
   subjects.forEach(sub => {
     const li = document.createElement("li");
     li.innerHTML = `
-      ${sub.name} (priority: ${sub.priority_level})
+      ${sub.name} (difficulty: ${sub.difficulty_level})
       <button onclick="deleteSubject(${sub.id})">Delete</button>
     `;
     list.appendChild(li);
@@ -35,22 +47,50 @@ async function createSubject() {
   const name = document.getElementById("subject-name").value;
   const priority = document.getElementById("subject-priority").value;
   const token = await getValidAccessToken();
+  if (!token) {
+    alert("Please log in first.");
+    window.location.href = "/project_frontend/html/logon.html";
+    return;
+  }
 
-  const res = await fetch(`${API}/subjects/subjects`, {
+  const res = await fetch(`${SUBJECTS_API}/subjects/subjects`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       "Authorization": "Bearer " + token
     },
-    body: JSON.stringify({ name, priority_level: priority })
+    body: JSON.stringify({ name, difficulty_level: parseInt(priority) })
   });
 
   if (res.ok) {
     loadSubjects();
   } else {
     const data = await res.json();
-    alert(data.message);
+    alert(data.message || data.msg || JSON.stringify(data));
   }
+}
+
+async function loadAssessments() {
+  const token = await getValidAccessToken();
+
+  const res = await fetch(`${SUBJECTS_API}/assessments/assessments`, {
+    headers: { "Authorization": "Bearer " + token }
+  });
+
+  if (!res.ok) {
+    console.error("Failed to load assessments");
+    return;
+  }
+
+  const assessments = await res.json();
+  const list = document.getElementById("assessment-list");
+  list.innerHTML = "";
+
+  assessments.forEach(assessment => {
+    const li = document.createElement("li");
+    li.textContent = `Subject ID: ${assessment.subject_id}, Mark: ${assessment.score}%, Weight: ${assessment.weight}%`;
+    list.appendChild(li);
+  });
 }
 
 async function createAssessment() {
@@ -58,8 +98,13 @@ async function createAssessment() {
   const score = document.getElementById("assessment-mark").value;
   const weight = document.getElementById("assessment-weight").value;
   const token = await getValidAccessToken();
+  if (!token) {
+    alert("Please log in first.");
+    window.location.href = "/project_frontend/html/logon.html";
+    return;
+  }
 
-  const res = await fetch(`${API}/assessments/assessments`, {
+  const res = await fetch(`${SUBJECTS_API}/assessments/assessments`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -72,11 +117,13 @@ async function createAssessment() {
     loadAssessments();
   } else {
     const data = await res.json();
-    alert(data.message);
+    alert(data.message || data.msg || JSON.stringify(data));
   }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  if (!requireLogin()) return;
+
   loadSubjects();
   loadAssessments();
 });

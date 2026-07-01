@@ -1,8 +1,8 @@
 from flask import request
 from flask_restx import Namespace, Resource, fields
-from models import Subject, PublicSubject, PublicSubjectUser, Assessment, User
-from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
-from auth import auth_ns
+from datetime import datetime
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from project_backend.models import Subject, Assessment
 
 subject_ns=Namespace('subjects', description='A namespace for subjects')
 
@@ -31,7 +31,7 @@ class SubjectListResource(Resource):
         """Get all subjects"""
         current_user=get_jwt_identity()
         subjects = Subject.query.filter_by(user_id=current_user) \
-                          .order_by(Subject.priority_level.desc()) \
+                          .order_by(Subject.difficulty_level.desc())\
                           .all()
         return subjects
     @jwt_required()
@@ -42,9 +42,9 @@ class SubjectListResource(Resource):
 
         new_subject = Subject(
             name=data['name'],
-            difficulty_level=data.get('difficulty_level', 1),
+            difficulty_level=data.get('difficulty_level', data.get('priority_level', 1)),
             user_id=current_user,
-            due_date=data.get('due_date')
+            #due_date=data.get('due_date')
         )
 
         new_subject.save()
@@ -62,7 +62,7 @@ class SubjectResource(Resource):
         subject.delete()
         return {"message": "Subject deleted", "id": id}, 200
     @jwt_required()
-    def calculate(self, id):
+    def get(self, id):
         """Calculate the cumulative weighted mark for a subject"""
         current_user=get_jwt_identity()
         subject = Subject.query.filter_by(id=id, user_id=current_user).first_or_404()
@@ -71,6 +71,14 @@ class SubjectResource(Resource):
     
 
 assessment_ns=Namespace('assessments', description='A namespace for assessments')
+
+def parse_due_date(value):
+    if not value:
+        return datetime.utcnow()
+    try:
+        return datetime.fromisoformat(value)
+    except ValueError:
+        return datetime.utcnow()
 
 assessment_model = assessment_ns.model(
     'Assessment',
@@ -106,6 +114,7 @@ class AssessmentListResource(Resource):
         return assessments
     @jwt_required()
     @assessment_ns.expect(assessment_input)
+    @assessment_ns.marshal_with(assessment_model)
     def post(self):
         """Create a new assessment"""
         current_user=get_jwt_identity()
@@ -113,13 +122,13 @@ class AssessmentListResource(Resource):
         new_assessment=Assessment(
             subject_id=data.get('subject_id'),
             score=data.get('score'),
-            total_score=data.get('total_score'),
+            total_score=data.get('total_score', 100),
             weight=data.get('weight'),
-            due_date=data.get('due_date')
+            due_date=parse_due_date(data.get('due_date'))
         )
-        subject = Subject.query.filter_by(id=data['subject_id'], user_id=current_user).first()
+        subject = Subject.query.filter_by(id=data.get('subject_id'), user_id=current_user).first()
         if not subject:
-            return {"message": "Invalid subject_id"}, 403
+            return {'message': 'Invalid subject_id'}, 403
         elif new_assessment.subject_id is None or new_assessment.score is None or new_assessment.total_score is None or new_assessment.weight is None:
             return {"message": "Subject ID, score, total score and weight are required"}, 400
         new_assessment.save()
