@@ -81,7 +81,7 @@ class TaskResource(Resource):
         """Get a task by id"""
         current_user = get_jwt_identity()
         task = Task.query.get_or_404(id)
-        if task.user_id != current_user:
+        if task.user_id != int(current_user):
             return {"message": "Forbidden"}, 403        
         return task, 200
 
@@ -92,7 +92,7 @@ class TaskResource(Resource):
         current_user = get_jwt_identity()
         task_to_update = Task.query.get_or_404(id)
         data = request.get_json() or {}
-        if task_to_update.user_id != current_user:
+        if task_to_update.user_id != int(current_user):
             return {"message": "Forbidden"}, 403
         task_to_update.title = data.get('title', task_to_update.title)
         task_to_update.description = data.get('description', task_to_update.description)
@@ -107,11 +107,10 @@ class TaskResource(Resource):
         """Delete a task by id"""
         current_user = get_jwt_identity()
         task_to_delete = Task.query.get_or_404(id)
-        if task_to_delete.user_id != current_user:
+        if task_to_delete.user_id != int(current_user):
             return {"message": "Forbidden"}, 403
         task_to_delete.delete()
-        return task_to_delete
-
+        return {"message": "Task deleted", "id": id}, 200
 
 @task_ns.route('/tasks/<int:id>/ready-score')
 class TaskReadyScoreResource(Resource):
@@ -122,7 +121,7 @@ class TaskReadyScoreResource(Resource):
         """
         current_user = get_jwt_identity()
         task = Task.query.get_or_404(id)
-        if task.user_id != current_user:
+        if task.user_id != int(current_user):
             return {"message": "Forbidden"}, 403
 
         data = request.get_json() or {}

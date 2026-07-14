@@ -79,10 +79,14 @@ async function loadTasks() {
 
   tasks.forEach(task => {
     const item = document.createElement("li");
-    item.textContent = task.title;
+    item.innerHTML = `
+      ${task.title}
+      <button onclick="deleteTask(${task.id}).then(() => loadTasks())">Delete</button>
+    `;
     list.appendChild(item);
   });
 }
+
 async function getTask(id) {
   const token = await getValidAccessToken();
   if (!token) {
@@ -183,6 +187,7 @@ document.addEventListener("DOMContentLoaded", () => {
   loadSubjectsIntoSelect();
   loadSubjects(); // Populate assessment-subject select and assessment list
 });
+
 const quotes = [
   "The only way to do great work is to love what you do. — Steve Jobs",
   "Change your thoughts and you change your world. — Norman Vincent Peale",

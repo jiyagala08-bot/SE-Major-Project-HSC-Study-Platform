@@ -129,7 +129,10 @@ async function loadAssessments() {
 
   assessments.forEach(assessment => {
     const li = document.createElement("li");
-    li.textContent = `Subject ID: ${assessment.subject_id}, Mark: ${assessment.score}%, Weight: ${assessment.weight}%`;
+    li.innerHTML = `
+      Subject ID: ${assessment.subject_id}, Mark: ${assessment.score}%, Weight: ${assessment.weight}%
+      <button onclick="deleteAssessment(${assessment.id})">Delete</button>
+    `;
     list.appendChild(li);
   });
 }
@@ -160,6 +163,27 @@ async function createAssessment() {
     const data = await res.json();
     alert(data.message || data.msg || JSON.stringify(data));
   }
+}
+
+async function deleteAssessment(id) {
+  const token = await getValidAccessToken();
+  if (!token) {
+    alert("Session expired. Please log in again.");
+    window.location.href = "/project_frontend/html/logon.html";
+    return;
+  }
+
+  const res = await fetch(`${SUBJECTS_API}/assessments/assessments/${id}`, {
+    method: "DELETE",
+    headers: { "Authorization": "Bearer " + token }
+  });
+
+  if (!res.ok) {
+    alert("Failed to delete assessment");
+    return;
+  }
+
+  await loadAssessments();
 }
 
 document.addEventListener("DOMContentLoaded", () => {

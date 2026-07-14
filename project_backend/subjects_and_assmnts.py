@@ -133,3 +133,16 @@ class AssessmentListResource(Resource):
             return {"message": "Subject ID, score, total score and weight are required"}, 400
         new_assessment.save()
         return new_assessment, 201
+
+@assessment_ns.route('/assessments/<int:id>')
+class AssessmentResource(Resource):
+    @jwt_required()
+    def delete(self, id):
+        """Delete an assessment by id"""
+        current_user = get_jwt_identity()
+        assessment = Assessment.query.join(Subject).filter(
+            Assessment.id == id,
+            Subject.user_id == current_user
+        ).first_or_404()
+        assessment.delete()
+        return {"message": "Assessment deleted", "id": id}, 200
