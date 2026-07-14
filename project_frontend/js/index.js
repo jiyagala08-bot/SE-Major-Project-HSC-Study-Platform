@@ -34,13 +34,14 @@ function handleCreateTask() {
   const description = document.getElementById("task-description").value;
   const priority_level = parseInt(document.getElementById("task-priority").value);
   const subject_id = parseInt(document.getElementById("task-subject").value);
-  console.log({ title, description, priority_level, subject_id }); // DEBUG
-  createTask(title, description, priority_level, subject_id)
+  const due_date = document.getElementById("task-due-date").value;
+  createTask(title, description, priority_level, subject_id, due_date)
     .then(() => loadTasks());
 }
 
 
-async function createTask(title, description, priority_level, subject_id) {
+
+async function createTask(title, description, priority_level, subject_id, due_date) {
   const token = await getValidAccessToken();
   if (!token) {
     alert("Session expired. Please log in again.");
@@ -58,7 +59,8 @@ async function createTask(title, description, priority_level, subject_id) {
       title,
       description,
       priority_level,
-      subject_id
+      subject_id,
+      due_date
     })
   });
 
@@ -95,7 +97,38 @@ async function toggleTaskComplete(id, completed) {
 
   await loadTasks();
 }
+async function calculateReadyScore(id) {
+  const timeinput = prompt("Estimated hours to complete this task?");
+  if (timeinput === null) return; // user cancelled
 
+  const hours = parseFloat(timeinput);
+  if (isNaN(hours) || hours < 0) {
+    alert("Please enter a valid number of hours.");
+    return;
+  }
+
+  const token = await getValidAccessToken();
+  if (!token) {
+    alert("Session expired. Please log in again.");
+    return;
+  }
+
+  const response = await fetch(`${TASKS_API}/tasks/tasks/${id}/ready-score`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+    body: JSON.stringify({ timeinput: hours })
+  });
+
+  if (!response.ok) {
+    alert("Failed to calculate ready score");
+    return;
+  }
+
+  await loadTasks(); // refresh so the new score shows
+}
 async function loadTasks() {
   const tasks = await getTasks();
   const activeList = document.getElementById("task-list");
@@ -105,17 +138,19 @@ async function loadTasks() {
 
   tasks.forEach(task => {
     const item = document.createElement("li");
+    const scoreText = task.ready_score != null ? `Ready: ${task.ready_score.toFixed(1)}%` : "Ready score not calculated";
 
     if (task.completed) {
       item.innerHTML = `
-        <s>${task.title}</s>
+        <s>${task.title}</s> — ${scoreText}
         <button onclick="toggleTaskComplete(${task.id}, false)">Mark Active</button>
         <button onclick="deleteTask(${task.id}).then(() => loadTasks())">Delete</button>
       `;
       completedList.appendChild(item);
     } else {
       item.innerHTML = `
-        ${task.title}
+        ${task.title} — ${scoreText}
+        <button onclick="calculateReadyScore(${task.id})">Calculate Ready Score</button>
         <button onclick="toggleTaskComplete(${task.id}, true)">Mark Done</button>
         <button onclick="deleteTask(${task.id}).then(() => loadTasks())">Delete</button>
       `;
@@ -123,7 +158,6 @@ async function loadTasks() {
     }
   });
 }
-
 async function getTask(id) {
   const token = await getValidAccessToken();
   if (!token) {

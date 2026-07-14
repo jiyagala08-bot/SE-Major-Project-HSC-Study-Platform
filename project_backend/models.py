@@ -76,6 +76,8 @@ class Task(db.Model):
     subject = db.relationship('Subject', back_populates='tasks')
     due_date = db.Column(db.Date, nullable=False)
     completed = db.Column(db.Boolean, default=False, nullable=False)
+    ready_score = db.Column(db.Float, nullable=True)
+
 
     def __repr__(self):
         return f"<Task {self.title}>"
