@@ -46,10 +46,12 @@ async function loadSubjects() {
     list.appendChild(li);
 
     // Add to select
-    const option = document.createElement("option");
-    option.value = sub.id;
-    option.textContent = sub.name;
-    select.appendChild(option);
+    if (select) {
+      const option = document.createElement("option");
+      option.value = sub.id;
+      option.textContent = sub.name;
+      select.appendChild(option);
+    }
   });
 }
 
@@ -120,10 +122,10 @@ async function loadAssessments() {
     console.error("Failed to load assessments");
     return;
   }
-if (!list) return; // Element doesn't exist on this page
-  
+
   const assessments = await res.json();
   const list = document.getElementById("assessment-list");
+  if (!list) return; // Element doesn't exist on this page
   list.innerHTML = "";
 
   assessments.forEach(assessment => {
