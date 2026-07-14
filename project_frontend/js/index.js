@@ -78,7 +78,7 @@ async function loadTasks() {
   list.innerHTML = "";
 
   tasks.forEach(task => {
-    const item = document.createElement("div");
+    const item = document.createElement("li");
     item.textContent = task.title;
     list.appendChild(item);
   });
