@@ -3,7 +3,7 @@ import os
 
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 class Config:
-    SECRET_KEY = config('SECRET_KEY', default='c4ee5b7eac59597e02488e8a')
+    SECRET_KEY = config('SECRET_KEY', default='a-very-secure-development-secret-key-32-chars-long!')
     SQLALCHEMY_TRACK_MODIFICATIONS = config('SQLALCHEMY_TRACK_MODIFICATIONS',default=False, cast=bool)
 
 

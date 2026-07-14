@@ -16,6 +16,8 @@ class PublicSubject(db.Model):
 class Profile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
+    school_year = db.Column(db.Integer, CheckConstraint('school_year >= 7 AND school_year <= 12'), nullable=True)
+    birthdate = db.Column(db.Date, nullable=True)
     optimal_study_time = db.Column(db.Integer, CheckConstraint('optimal_study_time >= 1 AND optimal_study_time <= 4'), nullable=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user = db.relationship("User", back_populates="profile")

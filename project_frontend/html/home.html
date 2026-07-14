@@ -36,12 +36,13 @@
   <option value="2">Medium</option>
   <option value="3">High</option>
 </select>
-
 <select id="task-subject">
+  <option value="" disabled selected>Create a subject in 'profile' to enable subject selection</option>
   <option value="1">Maths</option>
   <option value="2">English</option>
   <option value="3">Physics</option>
 </select>
+<p>*Create a subject in 'profile' to enable subject selection </p>
 <div id="task-message" style="color: green;"></div>
 <div id="task-failmessage" style="color: red;"></div>
 <button type="submit" id="create-task" onclick="handleCreateTask()">Create Task</button>
@@ -49,9 +50,31 @@
   <!-- Task List -->
   <ol id="task-list"></ol>
 
-  <button id="lgout" onclick="logoutUser()">Logout</button>
+  <h3>Assessments</h3>
+
+  <select id="assessment-subject">
+  <option value="1">Maths</option>
+  <option value="2">English</option>
+  <option value="3">Physics</option>
+  </select>
+
+  <select id="assessment-number">
+  <option value="1">1</option>
+  <option value="2">2</option>
+  <option value="3">3</option>
+  <option value="4">4</option>
+  </select>
+
+  <input id="assessment-weight" type="number" placeholder="Weight %">
+  <input id="assessment-mark" type="number" placeholder="Mark %">
+
+  <button id="addassessment" onclick="createAssessment()">Add Assessment</button>
+
+  <h3>Your Assessments</h3>
+  <ul id="assessment-list"></ul>
 
   <script src="/project_frontend/js/auth.js"></script>
+  <script src="/project_frontend/js/subjects.js"></script>
   <script src="/project_frontend/js/index.js"></script>
 </body>
 </html>

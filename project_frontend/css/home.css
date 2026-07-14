@@ -114,7 +114,7 @@ p{
 }
 
 /* Input fields */
-#task-title, #task-description, #task-priority, #task-subject, #subject-name, #subject-priority{
+#task-title, #task-description, #task-priority, #task-subject, #subject-name, #subject-priority, #assessment-number, #assessment-weight, #assessment-mark, #assessment-subject {
   color: #000;
   display: block;
   margin: 10px auto;
@@ -136,7 +136,7 @@ p{
   height: 50px;
 }
 
-#clear-tasks-btn, #lgout {
+#clear-tasks-btn, #lgout, #addassessment {
   width: 100px;
   height: 50px;
   cursor: pointer;
@@ -202,6 +202,32 @@ p{
   font-weight: bold;
   color: #A98B76;
 }
+#assessment-list {
+  list-style: none;
+  counter-reset: assessment-counter;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  text-align: left;
+  max-width: 500px;
+  margin: 0 auto;
+  font-size: 1.3rem;
+  color: #000;
+  font-family: "Playfair Display", serif;
+}
+
+#assessment-list li {
+  counter-increment: assessment-counter;
+}
+
+#assessment-list li::before {
+  content: counter(assessment-counter) ". ";
+  font-weight: bold;
+  color: #A98B76;
+  display: inline-block;
+  width: 1.5rem;
+}
+
 #daily-quote {
   font-style: italic;
   font-weight: bold;

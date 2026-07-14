@@ -21,11 +21,14 @@ async function loadSubjects() {
 
   const subjects = await res.json();
   const list = document.getElementById("subject-list");
+  if (!list) return; // Element doesn't exist on this page
   list.innerHTML = "";
 
   // Also populate the assessment-subject select
   const select = document.getElementById("assessment-subject");
-  select.innerHTML = ""; // Clear existing options
+  if (select) {
+    select.innerHTML = ""; // Clear existing options
+  }
 
   function getDifficultyLabel(level) {
   if (level <= 3) return "Low";
@@ -74,6 +77,12 @@ async function deleteSubject(id) {
 async function createSubject() {
   const name = document.getElementById("subject-name").value;
   const priority = document.getElementById("subject-priority").value;
+  
+  if (!name || !priority) {
+    alert("Please fill in both subject name and difficulty level");
+    return;
+  }
+  
   const token = await getValidAccessToken();
   if (!token) {
     alert("Please log in first.");
@@ -91,6 +100,8 @@ async function createSubject() {
   });
 
   if (res.ok) {
+    document.getElementById("subject-name").value = "";
+    document.getElementById("subject-priority").value = "";
     loadSubjects();
   } else {
     const data = await res.json();
@@ -109,7 +120,8 @@ async function loadAssessments() {
     console.error("Failed to load assessments");
     return;
   }
-
+if (!list) return; // Element doesn't exist on this page
+  
   const assessments = await res.json();
   const list = document.getElementById("assessment-list");
   list.innerHTML = "";

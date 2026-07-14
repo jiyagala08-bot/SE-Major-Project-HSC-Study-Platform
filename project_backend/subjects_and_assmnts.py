@@ -133,14 +133,3 @@ class AssessmentListResource(Resource):
             return {"message": "Subject ID, score, total score and weight are required"}, 400
         new_assessment.save()
         return new_assessment, 201
-
-profile_ns=Namespace('profiles', description='A namespace for profiles')
-
-profile_model = profile_ns.model(
-    'Profile',
-    {
-        'id': fields.Integer(),
-        'user_id' : fields.Integer(),
-        'name': fields.String(),
-    }
-)

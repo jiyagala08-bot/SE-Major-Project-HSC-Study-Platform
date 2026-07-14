@@ -10,12 +10,12 @@ Open the repository in GitHub and create a new Codespace.
 Open a terminal and run:
 
 cd /workspaces/SE-Major-Project-HSC-Study-Platform
-pip install -r project_backend/requirements.txt
+python3 -m pip install -r project_backend/requirements.txt
 3. Create the database (first time only)
 
 Run:
 
-PYTHONPATH=. python -c "from project_backend.main import create_app; from project_backend.config import DevConfig; from project_backend.exts import db; app=create_app(DevConfig); app.app_context().push(); db.create_all(); print('Database created successfully')"
+PYTHONPATH=. python3 -c "from project_backend.main import create_app; from project_backend.config import DevConfig; from project_backend.exts import db; app=create_app(DevConfig); app.app_context().push(); db.create_all(); print('Database created successfully')"
 
 This only needs to be completed once (or whenever the database is deleted).
 
@@ -23,7 +23,7 @@ This only needs to be completed once (or whenever the database is deleted).
 
 Run:
 
-PYTHONPATH=. python project_backend/run.py
+PYTHONPATH=. python3 project_backend/run.py
 
 The backend API will start on port 5000.
 
@@ -34,7 +34,7 @@ Leave this terminal running.
 Open a second terminal and run:
 
 cd /workspaces/SE-Major-Project-HSC-Study-Platform
-python -m http.server 5500
+python3 -m http.server 5500
 
 The frontend will start on port 5500.
 
