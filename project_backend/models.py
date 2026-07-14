@@ -31,7 +31,7 @@ class Subject(db.Model):
     name = db.Column(db.String, nullable=False)
     public_subject_id = db.Column(db.Integer, db.ForeignKey('public_subject.id'), nullable=True)
     difficulty_level = db.Column(db.Integer, CheckConstraint('difficulty_level >= 1 AND difficulty_level <= 10'), nullable=True)
-    assessments = db.relationship('Assessment', backref='subject', lazy=True)
+    assessments = db.relationship('Assessment', backref='subject', lazy=True, cascade='all, delete-orphan')
     user = db.relationship('User', backref='subjects')
     public_subject = db.relationship('PublicSubject', backref='private_subjects')
 
@@ -49,7 +49,7 @@ class Subject(db.Model):
 
 class Assessment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    subject_id = db.Column(db.Integer, db.ForeignKey('subject.id'))
+    subject_id = db.Column(db.Integer, db.ForeignKey('subject.id', ondelete='CASCADE'), nullable=False)
     score = db.Column(db.Float, nullable=True)
     total_score = db.Column(db.Float, CheckConstraint('total_score > 0 AND score <= total_score'), nullable=True)
     weight = db.Column(db.Float, CheckConstraint('weight >= 0 AND weight <= 100'), nullable=True)

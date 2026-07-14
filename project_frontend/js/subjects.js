@@ -43,6 +43,27 @@ async function loadSubjects() {
   });
 }
 
+async function deleteSubject(id) {
+  const token = await getValidAccessToken();
+  if (!token) {
+    alert("Session expired. Please log in again.");
+    window.location.href = "/project_frontend/html/logon.html";
+    return;
+  }
+
+  const res = await fetch(`${SUBJECTS_API}/subjects/subjects/${id}`, {
+    method: "DELETE",
+    headers: { "Authorization": "Bearer " + token }
+  });
+
+  if (!res.ok) {
+    alert("Failed to delete subject");
+    return;
+  }
+
+  await loadSubjects(); // refresh the list so the deleted subject disappears
+}
+
 async function createSubject() {
   const name = document.getElementById("subject-name").value;
   const priority = document.getElementById("subject-priority").value;
