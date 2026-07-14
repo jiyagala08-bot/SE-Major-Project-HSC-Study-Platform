@@ -218,4 +218,10 @@ const quotes = [
   //Generate a random index based on the array length and get the random quote
 const randomIndex = Math.floor(Math.random() * quotes.length);
 const randomQuote = quotes[randomIndex];
-console.log(randomQuote);
+
+document.addEventListener("DOMContentLoaded", () => {
+  const quoteEl = document.getElementById("daily-quote");
+  if (quoteEl) {
+    quoteEl.textContent = randomQuote;
+  }
+});

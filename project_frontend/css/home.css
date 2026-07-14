@@ -200,7 +200,14 @@ p{
   word-wrap: break-word;
   overflow-wrap: break-word;
 }
-
+#daily-quote {
+  font-style: italic;
+  font-weight: bold;
+  font-size: 1.2rem;
+  text-align: center;
+  color: #A98B76;
+  margin-bottom: 1.5rem;
+}
 /* Footer container */
 .footer {
   display: flex;
