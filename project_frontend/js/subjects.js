@@ -27,10 +27,17 @@ async function loadSubjects() {
   const select = document.getElementById("assessment-subject");
   select.innerHTML = ""; // Clear existing options
 
+  function getDifficultyLabel(level) {
+  if (level <= 3) return "Low";
+  if (level <= 6) return "Medium";
+  return "High";
+  }
+
+
   subjects.forEach(sub => {
     const li = document.createElement("li");
     li.innerHTML = `
-      ${sub.name} (difficulty: ${sub.difficulty_level})
+      ${sub.name} (difficulty: ${getDifficultyLabel(sub.difficulty_level)} - ${sub.difficulty_level})
       <button onclick="deleteSubject(${sub.id})">Delete</button>
     `;
     list.appendChild(li);
@@ -147,4 +154,4 @@ document.addEventListener("DOMContentLoaded", () => {
 
   loadSubjects();
   loadAssessments();
-});
+})

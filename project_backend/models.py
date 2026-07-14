@@ -142,7 +142,6 @@ class User(db.Model):
     username=db.Column(db.String(25),nullable=False,unique=True)
     email=db.Column(db.String(80), nullable=False, unique=True)
     password=db.Column(db.Text(),nullable=False)
-    role = db.Column(db.String(), nullable=False, default='user')
     profile = db.relationship("Profile", back_populates="user", uselist=False)
 
     def __repr__(self):

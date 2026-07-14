@@ -28,10 +28,19 @@
 
   <div>
   <input id="subject-name" placeholder="Subject name">
-  <select id="subject-priority">
-  <option value="1">Low</option>
-  <option value="2">Medium</option>
-  <option value="3">High</option>
+  <select id="subject-priority" placeholder="Difficulty level, where 1 is easiest and 10 is hardest">
+  <option value="" disabled selected>Difficulty (1 = easiest, 10 = hardest)</option>
+  <option value="1">1</option>
+  <option value="2">2</option>
+  <option value="3">3</option>
+  <option value="4">4</option>
+  <option value="5">5</option>
+  <option value="6">6</option>
+  <option value="7">7</option>
+  <option value="8">8</option>
+  <option value="9">9</option>
+  <option value="10">10</option>
+
   </select>
     <button id="createsub" onclick="createSubject()">Add Subject</button>
   </div>
