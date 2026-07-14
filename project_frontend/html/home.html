@@ -48,26 +48,33 @@
 <button type="submit" id="create-task" onclick="handleCreateTask()">Create Task</button>
 
   <!-- Task List -->
-  <ol id="task-list"></ol>
+  <h3>Active Tasks</h3>
+  <ul id="task-list"></ul>
+
+  <h3>Completed Tasks</h3>
+  <ul id="completed-task-list"></ul>
 
   <h3>Assessments</h3>
 
+  <p> Subject </p>
   <select id="assessment-subject">
   <option value="1">Maths</option>
   <option value="2">English</option>
   <option value="3">Physics</option>
   </select>
-
+  <p> Assessment Number </p>
   <select id="assessment-number">
   <option value="1">1</option>
   <option value="2">2</option>
   <option value="3">3</option>
   <option value="4">4</option>
   </select>
-
+  <p> Assessment weight </p>
   <input id="assessment-weight" type="number" placeholder="Weight %">
+  <p> Mark (in %) </p>
   <input id="assessment-mark" type="number" placeholder="Mark %">
-
+  <p>Due Date</p>
+  <input type="date" id="assessment-due-date">
   <button id="addassessment" onclick="createAssessment()">Add Assessment</button>
 
   <h3>Your Assessments</h3>

@@ -114,7 +114,7 @@ p{
 }
 
 /* Input fields */
-#task-title, #task-description, #task-priority, #task-subject, #subject-name, #subject-priority, #assessment-number, #assessment-weight, #assessment-mark, #assessment-subject {
+#task-title, #task-description, #task-priority, #task-subject, #subject-name, #subject-priority, #assessment-number, #assessment-weight, #assessment-mark, #assessment-subject, #assessment-due-date {
   color: #000;
   display: block;
   margin: 10px auto;

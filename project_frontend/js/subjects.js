@@ -124,7 +124,6 @@ async function loadAssessments() {
 
   const assessments = await res.json();
   const list = document.getElementById("assessment-list");
-  if (!list) return; // Element doesn't exist on this page
   list.innerHTML = "";
 
   assessments.forEach(assessment => {
@@ -141,6 +140,7 @@ async function createAssessment() {
   const subject_id = document.getElementById("assessment-subject").value;
   const score = document.getElementById("assessment-mark").value;
   const weight = document.getElementById("assessment-weight").value;
+  const due_date = document.getElementById("assessment-due-date").value;
   const token = await getValidAccessToken();
   if (!token) {
     alert("Please log in first.");
@@ -154,7 +154,7 @@ async function createAssessment() {
       "Content-Type": "application/json",
       "Authorization": "Bearer " + token
     },
-    body: JSON.stringify({ subject_id: parseInt(subject_id), score: parseFloat(score), weight: parseFloat(weight) })
+      body: JSON.stringify({ subject_id: parseInt(subject_id), score: parseFloat(score), weight: parseFloat(weight), due_date })
   });
 
   if (res.ok) {

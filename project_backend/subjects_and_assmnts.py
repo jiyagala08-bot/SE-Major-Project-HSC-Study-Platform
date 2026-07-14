@@ -86,9 +86,10 @@ assessment_model = assessment_ns.model(
         'id': fields.Integer(),
         'subject_id': fields.Integer(),
         'score': fields.Float(),
-        'total_score' : fields.Float(),
-        'weight' : fields.Float(),
-        'due_date' : fields.DateTime()
+        'total_score': fields.Float(),
+        'weight': fields.Float(),
+        'due_date': fields.String(),
+        'completed': fields.Boolean()
     }
 )
 assessment_input = assessment_ns.model(
@@ -146,3 +147,4 @@ class AssessmentResource(Resource):
         ).first_or_404()
         assessment.delete()
         return {"message": "Assessment deleted", "id": id}, 200
+    

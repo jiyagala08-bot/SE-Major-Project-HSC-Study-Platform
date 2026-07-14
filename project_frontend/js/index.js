@@ -72,18 +72,55 @@ async function createTask(title, description, priority_level, subject_id) {
   document.getElementById("task-message").textContent = "Task created successfully!";
   return data;
 }
+async function toggleTaskComplete(id, completed) {
+  const token = await getValidAccessToken();
+  if (!token) {
+    alert("Session expired. Please log in again.");
+    return;
+  }
+
+  const response = await fetch(`${TASKS_API}/tasks/tasks/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+    body: JSON.stringify({ completed })
+  });
+
+  if (!response.ok) {
+    alert("Failed to update task");
+    return;
+  }
+
+  await loadTasks();
+}
+
 async function loadTasks() {
   const tasks = await getTasks();
-  const list = document.getElementById("task-list");
-  list.innerHTML = "";
+  const activeList = document.getElementById("task-list");
+  const completedList = document.getElementById("completed-task-list");
+  activeList.innerHTML = "";
+  completedList.innerHTML = "";
 
   tasks.forEach(task => {
     const item = document.createElement("li");
-    item.innerHTML = `
-      ${task.title}
-      <button onclick="deleteTask(${task.id}).then(() => loadTasks())">Delete</button>
-    `;
-    list.appendChild(item);
+
+    if (task.completed) {
+      item.innerHTML = `
+        <s>${task.title}</s>
+        <button onclick="toggleTaskComplete(${task.id}, false)">Mark Active</button>
+        <button onclick="deleteTask(${task.id}).then(() => loadTasks())">Delete</button>
+      `;
+      completedList.appendChild(item);
+    } else {
+      item.innerHTML = `
+        ${task.title}
+        <button onclick="toggleTaskComplete(${task.id}, true)">Mark Done</button>
+        <button onclick="deleteTask(${task.id}).then(() => loadTasks())">Delete</button>
+      `;
+      activeList.appendChild(item);
+    }
   });
 }
 
