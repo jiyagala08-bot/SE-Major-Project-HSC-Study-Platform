@@ -56,7 +56,8 @@ class Assessment(db.Model):
     score = db.Column(db.Float, nullable=True)
     total_score = db.Column(db.Float, CheckConstraint('total_score > 0 AND score <= total_score'), nullable=True)
     weight = db.Column(db.Float, CheckConstraint('weight >= 0 AND weight <= 100'), nullable=True)
-    due_date = db.Column(db.DateTime,nullable=False)
+    due_date = db.Column(db.DateTime, nullable=False)
+    completed = db.Column(db.Boolean, default=False, nullable=False)
     ready_score = db.Column(db.Float, default=False)
 
     def save(self):
@@ -74,9 +75,9 @@ class Task(db.Model):
     priority_level=db.Column(db.Integer(), CheckConstraint('priority_level >= 1 AND priority_level <= 10'), nullable=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     subject_id = db.Column(db.Integer, db.ForeignKey('subject.id', ondelete='CASCADE'), nullable=True)
-    # ORM relationship
     subject = db.relationship('Subject', back_populates='tasks')
     due_date = db.Column(db.Date, nullable=False)
+    completed = db.Column(db.Boolean, default=False, nullable=False)
 
     def __repr__(self):
         return f"<Task {self.title}>"

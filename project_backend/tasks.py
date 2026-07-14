@@ -17,6 +17,7 @@ task_model = task_ns.model(
         'priority_level': fields.Integer(),
         'subject_id': fields.Integer(),
         'user_id': fields.Integer(),
+        'completed': fields.Boolean(),
         'ready_score': fields.Float()
     }
 )
@@ -98,7 +99,7 @@ class TaskResource(Resource):
         task_to_update.description = data.get('description', task_to_update.description)
         task_to_update.priority_level = data.get('priority_level', task_to_update.priority_level)
         task_to_update.subject_id = data.get('subject_id', task_to_update.subject_id)
-
+        task_to_update.completed = data.get('completed', task_to_update.completed)
         task_to_update.save()
         return task_to_update
 

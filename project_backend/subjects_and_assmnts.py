@@ -86,9 +86,10 @@ assessment_model = assessment_ns.model(
         'id': fields.Integer(),
         'subject_id': fields.Integer(),
         'score': fields.Float(),
-        'total_score' : fields.Float(),
-        'weight' : fields.Float(),
-        'due_date' : fields.DateTime()
+        'total_score': fields.Float(),
+        'weight': fields.Float(),
+        'due_date': fields.String(),
+        'completed': fields.Boolean()
     }
 )
 assessment_input = assessment_ns.model(
@@ -146,3 +147,18 @@ class AssessmentResource(Resource):
         ).first_or_404()
         assessment.delete()
         return {"message": "Assessment deleted", "id": id}, 200
+    @jwt_required()
+    def put(self, id):
+        """Toggle or update an assessment's completed status"""
+        current_user = get_jwt_identity()
+        assessment = Assessment.query.join(Subject).filter(
+            Assessment.id == id,
+            Subject.user_id == current_user
+        ).first_or_404()
+
+        data = request.get_json() or {}
+        if 'completed' in data:
+            assessment.completed = bool(data['completed'])
+
+        db.session.commit()
+        return {"message": "Assessment updated", "completed": assessment.completed}, 200

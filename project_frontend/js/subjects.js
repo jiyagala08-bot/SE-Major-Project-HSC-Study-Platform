@@ -110,6 +110,30 @@ async function createSubject() {
   }
 }
 
+async function toggleAssessmentComplete(id, completed) {
+  const token = await getValidAccessToken();
+  if (!token) {
+    alert("Session expired. Please log in again.");
+    return;
+  }
+
+  const res = await fetch(`${SUBJECTS_API}/assessments/assessments/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + token
+    },
+    body: JSON.stringify({ completed })
+  });
+
+  if (!res.ok) {
+    alert("Failed to update assessment");
+    return;
+  }
+
+  await loadAssessments();
+}
+
 async function loadAssessments() {
   const token = await getValidAccessToken();
 
@@ -122,6 +146,21 @@ async function loadAssessments() {
     return;
   }
 
+  const assessments = await res.json();
+  const list = document.getElementById("assessment-list");
+  list.innerHTML = "";
+
+  assessments.forEach(assessment => {
+    const li = document.createElement("li");
+    const details = `Subject ID: ${assessment.subject_id}, Mark: ${assessment.score}%, Weight: ${assessment.weight}%`;
+
+    li.innerHTML = assessment.completed
+      ? `<s>${details}</s> ✅ <button onclick="toggleAssessmentComplete(${assessment.id}, false)">Undo</button> <button onclick="deleteAssessment(${assessment.id})">Delete</button>`
+      : `${details} <button onclick="toggleAssessmentComplete(${assessment.id}, true)">Mark Complete</button> <button onclick="deleteAssessment(${assessment.id})">Delete</button>`;
+
+    list.appendChild(li);
+  });
+}
   const assessments = await res.json();
   const list = document.getElementById("assessment-list");
   if (!list) return; // Element doesn't exist on this page
