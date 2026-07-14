@@ -20,22 +20,29 @@ async function loadSubjects() {
   });
 
   const subjects = await res.json();
-  const list = document.getElementById("subject-list");
-  if (!list) return; // Element doesn't exist on this page
-  list.innerHTML = "";
 
-  // Also populate the assessment-subject select
+  // Populate the assessment-subject select
   const select = document.getElementById("assessment-subject");
   if (select) {
     select.innerHTML = ""; // Clear existing options
+    subjects.forEach(sub => {
+      const option = document.createElement("option");
+      option.value = sub.id;
+      option.textContent = sub.name;
+      select.appendChild(option);
+    });
   }
+
+  // Populate subject list if it exists
+  const list = document.getElementById("subject-list");
+  if (!list) return; // Element doesn't exist on this page
+  list.innerHTML = "";
 
   function getDifficultyLabel(level) {
   if (level <= 3) return "Low";
   if (level <= 6) return "Medium";
   return "High";
   }
-
 
   subjects.forEach(sub => {
     const li = document.createElement("li");
@@ -44,14 +51,6 @@ async function loadSubjects() {
       <button onclick="deleteSubject(${sub.id})">Delete</button>
     `;
     list.appendChild(li);
-
-    // Add to select
-    if (select) {
-      const option = document.createElement("option");
-      option.value = sub.id;
-      option.textContent = sub.name;
-      select.appendChild(option);
-    }
   });
 }
 

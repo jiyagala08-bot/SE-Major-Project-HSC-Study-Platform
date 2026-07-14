@@ -181,6 +181,7 @@ async function loadSubjectsIntoSelect() {
 document.addEventListener("DOMContentLoaded", () => {
   loadTasks();
   loadSubjectsIntoSelect();
+  loadSubjects(); // Populate assessment-subject select and assessment list
 });
 const quotes = [
   "The only way to do great work is to love what you do. — Steve Jobs",
