@@ -173,23 +173,56 @@ p{
 }
 
 #subject-list {
-    text-align: center;
-    font-size: 1.5rem;
-    margin-top: 10px;
-    margin-bottom: 10px;
-    color:#000;
-    font-family: "Playfair Display", serif;
+  list-style: none;
+  counter-reset: subject-counter;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  text-align: left;
+  max-width: 500px;
+  margin: 0 auto;
+  font-size: 1.3rem;
+  color: #000;
+  font-family: "Playfair Display", serif;
+}
+
+#subject-list li {
+  counter-increment: subject-counter;
+}
+
+#subject-list li::before {
+  content: counter(subject-counter) ". ";
+  font-weight: bold;
+  color: #A98B76;
+  display: inline-block;
+  width: 1.5rem;
 }
 
 #assessment-list {
-    text-align: center;
-    font-size: 1.5rem;
-    margin-top: 10px;
-    margin-bottom: 10px;
-    color:#000;
-    font-family: "Playfair Display", serif;
+  list-style: none;
+  counter-reset: assessment-counter;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  text-align: left;
+  max-width: 500px;
+  margin: 0 auto;
+  font-size: 1.3rem;
+  color: #000;
+  font-family: "Playfair Display", serif;
 }
 
+#assessment-list li {
+  counter-increment: assessment-counter;
+}
+
+#assessment-list li::before {
+  content: counter(assessment-counter) ". ";
+  font-weight: bold;
+  color: #A98B76;
+  display: inline-block;
+  width: 1.5rem;
+}
 /* Footer container */
 .footer {
   display: flex;

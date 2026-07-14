@@ -183,7 +183,7 @@ p{
 }
 
 #task-list {
-  text-align: center;
+  text-align: left;
   font-size: 1.3rem;
   margin-top: 10px;
   margin-bottom: 10px;
@@ -191,14 +191,16 @@ p{
   font-family: "Playfair Display", serif;
   list-style: none;
   max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
+  margin: 0 auto;
 }
 
 #task-list li {
-  width: 100%;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
+  counter-increment: task-counter;
+}
+#task-list li::before {
+  content: counter(task-counter) ". ";
+  font-weight: bold;
+  color: #A98B76;
 }
 #daily-quote {
   font-style: italic;
