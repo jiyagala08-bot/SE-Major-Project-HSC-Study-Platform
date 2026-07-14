@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_restx import Api,Resource,fields
 from project_backend.models import Task, User
 from project_backend.exts import db
@@ -12,8 +12,22 @@ from flask_cors import CORS
 
 def create_app(config):
     app=Flask(__name__)
-    CORS(app, resources={r"/*": {"origins": "*"}})
     app.config.from_object(config)
+
+    CORS(app,
+         resources={r"/*": {"origins": "*"}},
+         allow_headers=["Content-Type", "Authorization"],
+         methods=["GET", "HEAD", "POST", "OPTIONS", "PUT", "PATCH", "DELETE"])
+
+    @app.after_request
+    def add_cors_headers(response):
+        origin = request.headers.get("Origin")
+        if origin:
+            response.headers["Access-Control-Allow-Origin"] = origin
+            response.headers["Vary"] = "Origin"
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+        response.headers["Access-Control-Allow-Methods"] = "GET, HEAD, POST, OPTIONS, PUT, PATCH, DELETE"
+        return response
 
     db.init_app(app)
 

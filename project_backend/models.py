@@ -34,6 +34,7 @@ class Subject(db.Model):
     public_subject_id = db.Column(db.Integer, db.ForeignKey('public_subject.id'), nullable=True)
     difficulty_level = db.Column(db.Integer, CheckConstraint('difficulty_level >= 1 AND difficulty_level <= 10'), nullable=True)
     assessments = db.relationship('Assessment', backref='subject', lazy=True, cascade='all, delete-orphan')
+    tasks = db.relationship('Task', backref='subject', lazy=True, cascade='all, delete-orphan')
     user = db.relationship('User', backref='subjects')
     public_subject = db.relationship('PublicSubject', backref='private_subjects')
 
@@ -72,7 +73,7 @@ class Task(db.Model):
     description=db.Column(db.Text(), nullable=False)
     priority_level=db.Column(db.Integer(), CheckConstraint('priority_level >= 1 AND priority_level <= 10'), nullable=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    subject_id = db.Column(db.Integer, db.ForeignKey('subject.id'), nullable=True)
+    subject_id = db.Column(db.Integer, db.ForeignKey('subject.id', ondelete='CASCADE'), nullable=True)
     # ORM relationship
     subject = db.relationship('Subject', backref='tasks')
     due_date = db.Column(db.Date, nullable=False)
