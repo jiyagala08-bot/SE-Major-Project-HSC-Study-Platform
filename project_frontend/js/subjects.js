@@ -1,4 +1,4 @@
-const SUBJECTS_API = "https://psychic-space-funicular-q7pvrx4j7xv249v9-5000.app.github.dev";
+const SUBJECTS_API = "https://improved-space-yodel-r7gr699jrr662wwjj-5000.app.github.dev";
 
 function requireLogin() {
   const token = localStorage.getItem("access_token");

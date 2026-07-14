@@ -1,4 +1,4 @@
-const AUTH_API = "https://psychic-space-funicular-q7pvrx4j7xv249v9-5000.app.github.dev";
+const AUTH_API = "https://improved-space-yodel-r7gr699jrr662wwjj-5000.app.github.dev";
 
 async function signupUser() {
   if (!document.getElementById("signup-email")) return;

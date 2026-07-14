@@ -1,4 +1,4 @@
-const TASKS_API = "https://psychic-space-funicular-q7pvrx4j7xv249v9-5000.app.github.dev";
+const TASKS_API = "https://improved-space-yodel-r7gr699jrr662wwjj-5000.app.github.dev";
 
 function getToken() {
   return localStorage.getItem("access_token");
@@ -13,7 +13,7 @@ async function getTasks() {
     return [];
   }
 
-  const response = await fetch(`${TASKS_API}/tasks`, {
+  const response = await fetch(`${TASKS_API}/tasks/tasks`, {
     method: "GET",
     headers: {
       "Authorization": `Bearer ${token}`
@@ -48,7 +48,7 @@ async function createTask(title, description, priority_level, subject_id) {
     return null;
   }
 
-  const response = await fetch(`${TASKS_API}/tasks`, {
+  const response = await fetch(`${TASKS_API}/tasks/tasks`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -90,7 +90,7 @@ async function getTask(id) {
     return null;
   }
 
-  const response = await fetch(`${TASKS_API}/tasks/${id}`, {
+  const response = await fetch(`${TASKS_API}/tasks/tasks/${id}`, {
     method: "GET",
     headers: {
       "Authorization": `Bearer ${token}`
@@ -112,7 +112,7 @@ async function updateTask(id, title, description) {
     return null;
   }
 
-  const response = await fetch(`${TASKS_API}/tasks/${id}`, {
+  const response = await fetch(`${TASKS_API}/tasks/tasks/${id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -138,7 +138,7 @@ async function deleteTask(id) {
     return false;
   }
 
-  const response = await fetch(`${TASKS_API}/tasks/${id}`, {
+  const response = await fetch(`${TASKS_API}/tasks/tasks/${id}`, {
     method: "DELETE",
     headers: {
       "Authorization": `Bearer ${token}`
@@ -179,19 +179,9 @@ async function loadSubjectsIntoSelect() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  // Debug: print current token state
-  try {
-    console.log('DEBUG tokens on load', {
-      access: localStorage.getItem('access_token'),
-      refresh: localStorage.getItem('refresh_token')
-    });
-  } catch (e) {
-    console.warn('Unable to read localStorage for debug');
-  }
   loadTasks();
   loadSubjectsIntoSelect();
 });
-
 const quotes = [
   "The only way to do great work is to love what you do. — Steve Jobs",
   "Change your thoughts and you change your world. — Norman Vincent Peale",
