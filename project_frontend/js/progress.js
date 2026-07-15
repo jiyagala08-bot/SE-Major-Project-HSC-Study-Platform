@@ -146,7 +146,41 @@ async function deleteTask(id) {
   return true;
 }
 document.addEventListener("DOMContentLoaded", () => {
-  loadTasks();
+  if (!requireLogin()) return;
+  loadTasks();});
+
+async function loadProgressSummary() {
+  const tasks = await getTasks();
+  const summaryEl = document.getElementById("progress-summary");
+  if (!summaryEl) return;
+
+  if (!tasks || tasks.length === 0) {
+    summaryEl.textContent = "No tasks yet.";
+    return;
+  }
+
+  const totalReadyScore = tasks.reduce((sum, task) => {
+    if (task.completed) return sum + 100;
+    if (task.ready_score == null) return sum + 50;
+    return sum + task.ready_score;
+  }, 0);
+
+  const percentComplete = totalReadyScore / tasks.length;
+  
+  // Find the progress bar element
+  const progressBar = document.getElementById('my-progress-bar');
+  
+  // Only update if the element actually exists on the page
+  if (progressBar) {
+    // Format the number to 1 decimal place to match your text summary
+    const formattedPercent = percentComplete.toFixed(1); 
+    
+    progressBar.style.width = formattedPercent + "%";
+    progressBar.textContent = formattedPercent + "%";
+  }
+}
+document.addEventListener("DOMContentLoaded", () => {
+  loadProgressSummary();
 });
 const quotes = [
   "The only way to do great work is to love what you do. — Steve Jobs",
@@ -191,4 +225,3 @@ document.addEventListener("DOMContentLoaded", () => {
     quoteEl.textContent = randomQuote;
   }
 });
-
