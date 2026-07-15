@@ -62,6 +62,7 @@ async function loadSubjects() {
   const li = document.createElement("li");
   li.innerHTML = `
     ${sub.name} - ${avgText}
+    ${avg ? `(${calculateGrade(avg)})` : ""}
     (difficulty: ${getDifficultyLabel(sub.difficulty_level)} - ${sub.difficulty_level})
     <button onclick="deleteSubject(${sub.id})">Delete</button>
   `;
@@ -135,8 +136,18 @@ function calculateSubjectWeightedAverage(subjectId) {
   const weightedAverage =
     subjectAssessments.reduce((sum, a) => sum + (a.score * a.weight), 0) /
     totalWeight;
-
+  
   return weightedAverage.toFixed(2);
+}
+
+function calculateGrade(weightedAverage) {
+  let avg = parseFloat(weightedAverage);
+  if (avg === null) return "N/A";
+  if (avg >= 80) return "A";
+  if (avg >= 60) return "B";
+  if (avg >= 40) return "C";
+  if (avg >= 20) return "D";
+  return "E";
 }
 
 
@@ -172,11 +183,12 @@ async function loadAssessments() {
     // Subject header WITH cumulative weighted score
   const avg = calculateSubjectWeightedAverage(parseInt(subjectId));
   const avgText = avg ? ` - Cumulative Mark: ${avg}%` : "";
+  const gradeText = avg ? ` - Grade: ${calculateGrade(avg)}` : "";
 
   const subjectHeader = document.createElement("li");
-subjectHeader.classList.add("subject-header");
-subjectHeader.innerHTML = `<strong>${subjectName}${avgText}</strong>`;
-list.appendChild(subjectHeader);
+  subjectHeader.classList.add("subject-header");
+  subjectHeader.innerHTML = `<strong>${subjectName}${avgText}${gradeText}</strong>`;
+  list.appendChild(subjectHeader);
 
 
     // Create a nested list for assessments
@@ -276,4 +288,3 @@ document.addEventListener("DOMContentLoaded", async () => {
   await loadSubjects();
   await loadAssessments();
 });
-
