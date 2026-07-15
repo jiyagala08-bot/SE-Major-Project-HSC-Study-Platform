@@ -191,9 +191,9 @@ p{
   width: 1.5rem;
 }
 
-#assessment-list {
+#assessment-list ul {
   list-style: none;
-  counter-reset: assessment-counter;
+  counter-reset: none; /* Prevent numbering from subject list affecting assessment list */
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -208,23 +208,14 @@ p{
   font-size: 1.3rem;
   color: #000;
   font-family: "Playfair Display", serif;
+  list-style-type: disc;
+  margin-left: 20px;
 }
 
-#assessment-list li {
-  counter-increment: assessment-counter;
-  padding: 8px;
-  margin: 5px 0;
-  background-color: rgba(255, 255, 255, 0.6);
-  border-radius: 5px;
+#assessment-list ul li::before {
+  content: "";   /* remove numbering */
 }
 
-#assessment-list li::before {
-  content: counter(assessment-counter) ". ";
-  font-weight: bold;
-  color: #A98B76;
-  display: inline-block;
-  width: 1.5rem;
-}
 .profile-container {
   display: flex;
   flex-direction: column;

@@ -78,7 +78,6 @@ class Task(db.Model):
     completed = db.Column(db.Boolean, default=False, nullable=False)
     ready_score = db.Column(db.Float, nullable=True)
 
-
     def __repr__(self):
         return f"<Task {self.title}>"
     

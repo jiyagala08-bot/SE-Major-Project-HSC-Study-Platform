@@ -300,7 +300,7 @@ p{
   font-weight: bold;
   color: #A98B76;
 }
-#assessment-list {
+#assessment-list ul {
   list-style: none;
   counter-reset: assessment-counter;
   display: flex;
@@ -312,18 +312,26 @@ p{
   font-size: 1.3rem;
   color: #000;
   font-family: "Playfair Display", serif;
+  counter-reset: none;
 }
 
-#assessment-list li {
-  counter-increment: assessment-counter;
-}
-
-#assessment-list li::before {
-  content: counter(assessment-counter) ". ";
-  font-weight: bold;
+#assessment-list ul li::before {
+  content: "★ ";   /* remove numbering */ 
   color: #A98B76;
+  font-weight: bold;
   display: inline-block;
   width: 1.5rem;
+}
+/* Subject header styling */
+.subject-header {
+  list-style: none !important;
+  font-size: 1.4rem;
+  color: #000;
+  padding: 5px 0;
+}
+
+.subject-header::before {
+  content: ""; /* no star */
 }
 
 #daily-quote {

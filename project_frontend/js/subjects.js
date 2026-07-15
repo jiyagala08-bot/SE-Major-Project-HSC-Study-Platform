@@ -13,6 +13,7 @@ function requireLogin() {
 }
 
 let SUBJECT_CACHE = [];
+let ASSESSMENT_CACHE = [];
 
 async function loadSubjects() {
   const token = await getValidAccessToken();
@@ -22,8 +23,14 @@ async function loadSubjects() {
   });
 
   const subjects = await res.json();
+  const assessRes = await fetch(`${SUBJECTS_API}/assessments/assessments`, {
+    headers: { "Authorization": "Bearer " + token }
+});
+  const assessments = await assessRes.json();
+
 
   SUBJECT_CACHE = subjects;
+  ASSESSMENT_CACHE = assessments;
 
   // Populate the assessment-subject select
   const select = document.getElementById("assessment-subject");
@@ -49,13 +56,17 @@ async function loadSubjects() {
   }
 
   subjects.forEach(sub => {
-    const li = document.createElement("li");
-    li.innerHTML = `
-      ${sub.name} (difficulty: ${getDifficultyLabel(sub.difficulty_level)} - ${sub.difficulty_level})
-      <button onclick="deleteSubject(${sub.id})">Delete</button>
-    `;
-    list.appendChild(li);
-  });
+  const avg = calculateSubjectWeightedAverage(sub.id);
+  const avgText = avg ? `Weighted Average: ${avg}%` : "No assessments yet";
+
+  const li = document.createElement("li");
+  li.innerHTML = `
+    ${sub.name} — ${avgText}
+    (difficulty: ${getDifficultyLabel(sub.difficulty_level)} - ${sub.difficulty_level})
+    <button onclick="deleteSubject(${sub.id})">Delete</button>
+  `;
+  list.appendChild(li);
+});
 }
 
 async function deleteSubject(id) {
@@ -113,6 +124,21 @@ async function createSubject() {
     alert(data.message || data.msg || JSON.stringify(data));
   }
 }
+function calculateSubjectWeightedAverage(subjectId) {
+  const subjectAssessments = ASSESSMENT_CACHE.filter(a => a.subject_id === subjectId);
+
+  if (subjectAssessments.length === 0) return null;
+
+  const totalWeight = subjectAssessments.reduce((sum, a) => sum + a.weight, 0);
+  if (totalWeight === 0) return null;
+
+  const weightedAverage =
+    subjectAssessments.reduce((sum, a) => sum + (a.score * a.weight), 0) /
+    totalWeight;
+
+  return weightedAverage.toFixed(2);
+}
+
 
 async function loadAssessments() {
   const token = await getValidAccessToken();
@@ -127,21 +153,49 @@ async function loadAssessments() {
   }
 
   const assessments = await res.json();
+  ASSESSMENT_CACHE = assessments;
+
   const list = document.getElementById("assessment-list");
   list.innerHTML = "";
 
-  assessments.forEach(assessment => {
-    const subject = SUBJECT_CACHE.find(s => s.id === assessment.subject_id);
-    const subjectName = subject ? subject.name : `Unknown (${assessment.subject_id})`;
+  // Group assessments by subject_id
+  const grouped = {};
+  assessments.forEach(a => {
+    if (!grouped[a.subject_id]) grouped[a.subject_id] = [];
+    grouped[a.subject_id].push(a);
+  });
 
-    const li = document.createElement("li");
-    li.innerHTML = `
-      Subject: ${subjectName}, Mark: ${assessment.score}%, Weight: ${assessment.weight}%
-      <button onclick="deleteAssessment(${assessment.id})">Delete</button>
-    `;
-    list.appendChild(li);
-});
+  Object.keys(grouped).forEach(subjectId => {
+    const subject = SUBJECT_CACHE.find(s => s.id === parseInt(subjectId));
+    const subjectName = subject ? subject.name : `Unknown Subject (${subjectId})`;
+
+    // Subject header WITH cumulative weighted score
+  const avg = calculateSubjectWeightedAverage(parseInt(subjectId));
+  const avgText = avg ? ` — Cumulative Mark: ${avg}%` : "";
+
+  const subjectHeader = document.createElement("li");
+subjectHeader.classList.add("subject-header");
+subjectHeader.innerHTML = `<strong>${subjectName}${avgText}</strong>`;
+list.appendChild(subjectHeader);
+
+
+    // Create a nested list for assessments
+    const subList = document.createElement("ul");
+    subList.style.marginLeft = "20px";
+
+    grouped[subjectId].forEach(a => {
+      const li = document.createElement("li");
+      li.innerHTML = `
+        Mark: ${a.score}%, Weight: ${a.weight}%
+        <button onclick="deleteAssessment(${a.id})">Delete</button>
+      `;
+      subList.appendChild(li);
+    });
+
+    list.appendChild(subList);
+  });
 }
+
 
 async function createAssessment() {
   const subject_id = document.getElementById("assessment-subject").value;
@@ -193,9 +247,10 @@ async function deleteAssessment(id) {
   await loadAssessments();
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   if (!requireLogin()) return;
 
-  loadSubjects();
-  loadAssessments();
-})
+  await loadSubjects();
+  await loadAssessments();
+});
+
