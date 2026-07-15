@@ -47,11 +47,12 @@
     z-index:9999;
   ">
   <h3>Edit Task</h3>
-
+  <p> Task Title </p>
   <input id="edit-task-title" type="text" maxlength="100">
-
+  <p> Task Description </p>
   <textarea id="edit-task-description" maxlength="500"></textarea>
 
+  <p> Priority Level </p>
   <select id="edit-task-priority">
     <option value="">Select priority</option>
     <option value="1">Low</option>
@@ -59,9 +60,14 @@
     <option value="3">High</option>
   </select>
 
+  <p> Subject </p>
   <select id="edit-task-subject"></select>
 
+  <p> Due Date </p>
   <input id="edit-task-duedate" type="date">
+
+  <p>Estimated hours to complete</p>
+  <input id="edit-task-hours" type="number" min="0" step="0.1">
 
   <button id = "edit-task" onclick="saveTaskEdits()">Save</button>
   <button id = "cancel-edit" onclick="closeTaskEditor()">Cancel</button>
@@ -99,6 +105,8 @@
     <p id = notice>*Create a subject in 'profile' to enable subject selection</p>
     <p>Due Date</p>
     <input type="date" id="task-due-date">
+    <p>Estimated hours to complete</p>
+    <input id="task-hours" type="number" min="0" step="0.1">
     <div id="task-message" style="color: green;"></div>
     <div id="task-failmessage" style="color: red;"></div>
     <button type="submit" id="create-task" onclick="handleCreateTask()">Create Task</button>

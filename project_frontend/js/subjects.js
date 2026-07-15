@@ -61,7 +61,7 @@ async function loadSubjects() {
 
   const li = document.createElement("li");
   li.innerHTML = `
-    ${sub.name} — ${avgText}
+    ${sub.name} - ${avgText}
     (difficulty: ${getDifficultyLabel(sub.difficulty_level)} - ${sub.difficulty_level})
     <button onclick="deleteSubject(${sub.id})">Delete</button>
   `;
@@ -171,7 +171,7 @@ async function loadAssessments() {
 
     // Subject header WITH cumulative weighted score
   const avg = calculateSubjectWeightedAverage(parseInt(subjectId));
-  const avgText = avg ? ` — Cumulative Mark: ${avg}%` : "";
+  const avgText = avg ? ` - Cumulative Mark: ${avg}%` : "";
 
   const subjectHeader = document.createElement("li");
 subjectHeader.classList.add("subject-header");

@@ -81,11 +81,15 @@ async function saveTaskEdits() {
   const priority_level = parseInt(document.getElementById("edit-task-priority").value);
   const subject_id = parseInt(document.getElementById("edit-task-subject").value);
   const duedate = document.getElementById("edit-task-duedate").value.trim();
+  const hours = parseFloat(document.getElementById("edit-task-hours").value);
+
   const updated = await updateTask(CURRENT_EDIT_TASK_ID, title, description, priority_level, subject_id, duedate);
 
   if (updated) {
+    // recalc ready score automatically
+    await calculateReadyScore(CURRENT_EDIT_TASK_ID, hours);
     closeTaskEditor();
-    loadTasks(); // refresh your task list
+    loadTasks();
   }
 }
 
@@ -95,8 +99,15 @@ function handleCreateTask() {
   const priority_level = parseInt(document.getElementById("task-priority").value);
   const subject_id = parseInt(document.getElementById("task-subject").value);
   const due_date = document.getElementById("task-due-date").value;
+  
   createTask(title, description, priority_level, subject_id, due_date)
-    .then(() => loadTasks());
+    .then(async (task) => {
+      if (task) {
+        const hours = parseFloat(document.getElementById("task-hours").value);
+        await calculateReadyScore(task.id, hours);
+        loadTasks();
+      }
+    });
 }
 
 async function createTask(title, description, priority_level, subject_id, due_date) {
@@ -105,18 +116,6 @@ async function createTask(title, description, priority_level, subject_id, due_da
     alert("Session expired. Please log in again.");
     window.location.href = "/project_frontend/html/logon.html";
     return null;
-  }
-
-  // Name length restriction
-  if (title.length > 100) {
-    alert("Task name cannot exceed 100 characters.");
-    return;
-  }
-
-  // Description length restriction
-  if (description.length > 500) {
-    alert("Task description cannot exceed 500 characters.");
-    return;
   }
 
   const response = await fetch(`${TASKS_API}/tasks/tasks`, {
@@ -141,7 +140,11 @@ async function createTask(title, description, priority_level, subject_id, due_da
       data.message || "Task creation failed";
     return null;
   }
+
+  return data;
 }
+
+
 
 async function toggleTaskComplete(id, completed) {
   const token = await getValidAccessToken();
@@ -166,21 +169,15 @@ async function toggleTaskComplete(id, completed) {
 
   await loadTasks();
 }
-async function calculateReadyScore(id) {
-  const timeinput = prompt("Estimated hours to complete this task?");
-  if (timeinput === null) return; // user cancelled
-
-  const hours = parseFloat(timeinput);
+async function calculateReadyScore(id, hours) {
   if (isNaN(hours) || hours < 0) {
-    alert("Please enter a valid number of hours.");
+    alert("Please enter a valid number of hours before calculating.");
     return;
   }
 
+  saveHoursLocally(id, hours);
   const token = await getValidAccessToken();
-  if (!token) {
-    alert("Session expired. Please log in again.");
-    return;
-  }
+  if (!token) return;
 
   const response = await fetch(`${TASKS_API}/tasks/tasks/${id}/ready-score`, {
     method: "POST",
@@ -196,8 +193,9 @@ async function calculateReadyScore(id) {
     return;
   }
 
-  await loadTasks(); // refresh so the new score shows
+  await loadTasks();
 }
+
 async function loadTasks() {
   const tasks = await getTasks();
   const activeList = document.getElementById("task-list");
@@ -205,22 +203,44 @@ async function loadTasks() {
   activeList.innerHTML = "";
   completedList.innerHTML = "";
 
+  const priorityLabels = { 1: "Low", 2: "Medium", 3: "High" };
+
   tasks.forEach(task => {
     const item = document.createElement("li");
     const scoreText = task.ready_score != null ? `Ready: ${task.ready_score.toFixed(1)}%` : "Ready score not calculated";
+    const priorityText = priorityLabels[task.priority_level] || "Not set";
+    const dueDateText = task.due_date || "Not set";
+    const hoursText = getSavedHours(task.id) || "Not set";
+
+    const detailsHtml = `
+      <div class="task-details">
+        <span>Priority: ${priorityText}</span>
+        <span>Due: ${dueDateText}</span>
+        <span>Est. hours: ${hoursText}</span>
+        <span>Subject: ${task.subject_name || "No subject"}</span>
+      </div>
+    `;
+    const descHtml = `
+      <div class="task-desc">
+        <span>Description: ${task.description ? task.description : "No description"}</span>
+      </div>
+    `;
 
     if (task.completed) {
       item.innerHTML = `
-        <s>${task.title}</s> — ${scoreText}
+        <s>${task.title}</s> - ${scoreText}
+        ${detailsHtml}
+        ${descHtml}
         <button onclick="toggleTaskComplete(${task.id}, false)">Mark Active</button>
         <button onclick="deleteTask(${task.id}).then(() => loadTasks())">Delete</button>
       `;
       completedList.appendChild(item);
     } else {
       item.innerHTML = `
-        ${task.title} — ${scoreText}
-        ${task.description ? task.description : ""}
-        <button onclick="calculateReadyScore(${task.id})">Calculate Ready Score</button>
+        ${task.title} - ${scoreText}
+        ${detailsHtml}
+        ${descHtml}
+        <button onclick="calculateReadyScore(${task.id}, parseFloat(getSavedHours(${task.id})))">Calculate Ready Score</button>
         <button onclick="toggleTaskComplete(${task.id}, true)">Mark Done</button>
         <button onclick="deleteTask(${task.id}).then(() => loadTasks())">Delete</button>
         <button onclick="openTaskEditor(
@@ -231,7 +251,6 @@ async function loadTasks() {
           ${task.subject_id},
           '${task.due_date}'
         )">Edit</button>
-
       `;
       activeList.appendChild(item);
     }
@@ -349,6 +368,13 @@ async function loadSubjectsIntoSelect() {
     option.textContent = sub.name;
     select.appendChild(option);
   });
+}
+function saveHoursLocally(taskId, hours) {
+  localStorage.setItem(`task-hours-${taskId}`, hours);
+}
+
+function getSavedHours(taskId) {
+  return localStorage.getItem(`task-hours-${taskId}`) || "";
 }
 
 document.addEventListener("DOMContentLoaded", () => {

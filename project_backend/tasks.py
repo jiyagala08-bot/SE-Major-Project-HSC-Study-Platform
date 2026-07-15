@@ -136,30 +136,32 @@ class TaskReadyScoreResource(Resource):
         except ValueError:
             return {"message": "timeinput must be a number"}, 400
         if timeinput <= 3:
-            timeinput_score = 1
-        elif timeinput == 4:
-            timeinput_score = 2
-        elif timeinput == 5:
-            timeinput_score = 3
-        elif timeinput == 6:
-            timeinput_score = 4
-        elif timeinput in (7, 8):
-            timeinput_score = 5
-        elif timeinput in (9, 10):
-            timeinput_score = 6
-        elif timeinput in (11, 12):
-            timeinput_score = 7
-        elif 13 <= timeinput <= 15:
-            timeinput_score = 8
-        elif 16 <= timeinput <= 18:
-            timeinput_score = 9
-        elif timeinput > 18:
             timeinput_score = 10
+        elif timeinput == 4:
+            timeinput_score = 9
+        elif timeinput == 5:
+            timeinput_score = 8
+        elif timeinput == 6:
+            timeinput_score = 7
+        elif timeinput in (7, 8):
+            timeinput_score = 6
+        elif timeinput in (9, 10):
+            timeinput_score = 5
+        elif timeinput in (11, 12):
+            timeinput_score = 4
+        elif 13 <= timeinput <= 15:
+            timeinput_score = 3
+        elif 16 <= timeinput <= 18:
+            timeinput_score = 2
+        elif timeinput > 18:
+            timeinput_score = 1
         else:
             timeinput_score = 5
 
         days_left_score = task.days_left_score()
-        priority_level = task.priority_level if task.priority_level is not None else 5
+        # Convert frontend 1–3 scale into backend 1–10 scale
+        priority_map = {1: 3, 2: 6, 3: 9}
+        priority_level = priority_map.get(task.priority_level, 6)
         subject_difficulty = task.subject.difficulty_level if task.subject else 5
         subject_cumulative_score = (task.subject.calculate_cumulative_score() * 0.1) if task.subject else 5
 
