@@ -99,8 +99,6 @@ function handleCreateTask() {
     .then(() => loadTasks());
 }
 
-
-
 async function createTask(title, description, priority_level, subject_id, due_date) {
   const token = await getValidAccessToken();
   if (!token) {
