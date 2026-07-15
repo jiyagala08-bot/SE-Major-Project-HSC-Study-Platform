@@ -178,11 +178,11 @@ async function loadProgressSummary() {
   progressBar.style.width = formattedPercent + "%";
   progressBar.textContent = formattedPercent + "%";
   }
-    if (percentComplete < 20) {
-    summaryEl.textContent = `Procrasrination at its peak. *smh*!`;
+    if (percentComplete <= 20) {
+    summaryEl.textContent = `Procrasrination at its peak.`;
     return;
   }
-  if (percentComplete >= 20 && percentComplete < 40) {
+  if (percentComplete > 20 && percentComplete < 40) {
     summaryEl.textContent = `Do better.`;
     return;
   }
