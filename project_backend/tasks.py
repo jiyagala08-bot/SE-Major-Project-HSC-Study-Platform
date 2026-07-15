@@ -19,7 +19,8 @@ task_model = task_ns.model(
         'user_id': fields.Integer(),
         'completed': fields.Boolean(),
         'ready_score': fields.Float(),
-        'due_date': fields.String()
+        'due_date': fields.String(),
+        'subject_name': fields.String(attribute=lambda t: t.subject.name if t.subject else None)
     }
 )
 

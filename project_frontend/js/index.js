@@ -207,7 +207,7 @@ async function loadTasks() {
 
   tasks.forEach(task => {
     const item = document.createElement("li");
-    const scoreText = task.ready_score != null ? `Ready: ${task.ready_score.toFixed(1)}%` : "Ready score not calculated";
+    const scoreText = task.ready_score != null ? `Readiness: ${task.ready_score.toFixed(1)}%` : "Ready score not calculated";
     const priorityText = priorityLabels[task.priority_level] || "Not set";
     const dueDateText = task.due_date || "Not set";
     const hoursText = getSavedHours(task.id) || "Not set";

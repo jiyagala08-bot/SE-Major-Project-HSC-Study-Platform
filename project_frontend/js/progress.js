@@ -65,16 +65,13 @@ async function loadTasks() {
 
   tasks.forEach(task => {
     const item = document.createElement("li");
-    const scoreText = task.ready_score != null ? `Ready: ${task.ready_score.toFixed(1)}%` : "Ready score not calculated";
+    const scoreText = task.ready_score != null ? `Readiness: ${task.ready_score.toFixed(1)}%` : "Ready score not calculated";
     const priorityText = priorityLabels[task.priority_level] || "Not set";
     const dueDateText = task.due_date || "Not set";
-    const hoursText = getSavedHours(task.id) || "Not set";
-
     const detailsHtml = `
       <div class="task-details">
         <span>Priority: ${priorityText}</span>
         <span>Due: ${dueDateText}</span>
-        <span>Est. hours: ${hoursText}</span>
         <span>Subject: ${task.subject_name || "No subject"}</span>
       </div>
     `;
@@ -148,6 +145,9 @@ async function deleteTask(id) {
 
   return true;
 }
+document.addEventListener("DOMContentLoaded", () => {
+  loadTasks();
+});
 const quotes = [
   "The only way to do great work is to love what you do. — Steve Jobs",
   "Change your thoughts and you change your world. — Norman Vincent Peale",
@@ -191,3 +191,4 @@ document.addEventListener("DOMContentLoaded", () => {
     quoteEl.textContent = randomQuote;
   }
 });
+
