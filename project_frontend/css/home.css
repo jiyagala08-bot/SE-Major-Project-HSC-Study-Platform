@@ -114,7 +114,7 @@ p{
 }
 
 /* Input fields */
-#task-title, #task-description, #task-priority, #task-subject, #subject-name, #subject-priority, #assessment-number, #assessment-weight, #assessment-mark, #assessment-subject, #assessment-due-date, #task-due-date {
+#task-title, #task-description, #task-priority, #task-subject, #subject-name, #subject-priority, #assessment-number, #assessment-weight, #assessment-mark, #assessment-subject, #assessment-due-date, #task-due-date, #edit-task-title, #edit-task-description, #edit-task-priority, #edit-task-subject, #edit-task-duedate {
   color: #000;
   display: block;
   margin: 10px auto;
@@ -136,7 +136,7 @@ p{
   height: 50px;
 }
 
-#clear-tasks-btn, #lgout, #addassessment {
+#clear-tasks-btn, #lgout, #addassessment, #edit-task, #cancel-edit {
   width: 100px;
   height: 50px;
   cursor: pointer;
@@ -334,7 +334,7 @@ p{
   content: ""; /* no star */
 }
 
-#daily-quote {
+#daily-quote, #notice {
   font-style: italic;
   font-weight: bold;
   font-size: 1.2rem;

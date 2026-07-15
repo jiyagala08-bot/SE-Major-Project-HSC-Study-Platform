@@ -56,7 +56,7 @@ class Assessment(db.Model):
     score = db.Column(db.Float, nullable=True)
     total_score = db.Column(db.Float, CheckConstraint('total_score > 0 AND score <= total_score'), nullable=True)
     weight = db.Column(db.Float, CheckConstraint('weight >= 0 AND weight <= 100'), nullable=True)
-    due_date = db.Column(db.DateTime, nullable=False)
+    due_date = db.Column(db.DateTime, nullable=True)
 
     def save(self):
         db.session.add(self)

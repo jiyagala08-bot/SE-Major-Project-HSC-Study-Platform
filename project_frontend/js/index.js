@@ -28,6 +28,66 @@ async function getTasks() {
 
   return response.json();
 }
+let CURRENT_EDIT_TASK_ID = null;
+
+async function loadSubjectsIntoEditSelect() {
+  const token = await getValidAccessToken();
+  if (!token) return;
+
+  const response = await fetch(`${TASKS_API}/subjects/subjects`, {
+    headers: { "Authorization": `Bearer ${token}` }
+  });
+
+  if (!response.ok) return;
+
+  const subjects = await response.json();
+  const select = document.getElementById("edit-task-subject");
+  select.innerHTML = "";
+
+  subjects.forEach(sub => {
+    const option = document.createElement("option");
+    option.value = sub.id;
+    option.textContent = sub.name;
+    select.appendChild(option);
+  });
+}
+
+function openTaskEditor(id, title, description, priority_level, subject_id, due_date) {
+  CURRENT_EDIT_TASK_ID = id;
+
+  // Load subjects into the dropdown
+  loadSubjectsIntoEditSelect().then(() => {
+    document.getElementById("edit-task-subject").value = subject_id;
+  });
+
+  document.getElementById("edit-task-title").value = title;
+  document.getElementById("edit-task-description").value = description;
+  document.getElementById("edit-task-priority").value = priority_level;
+  document.getElementById("edit-task-duedate").value = due_date;
+
+    document.getElementById("task-edit-overlay").style.display = "block";
+  document.getElementById("task-edit-popup").style.display = "block";
+}
+
+
+function closeTaskEditor() {
+  document.getElementById("task-edit-popup").style.display = "none";
+  document.getElementById("task-edit-overlay").style.display = "none";
+  CURRENT_EDIT_TASK_ID = null;
+}
+async function saveTaskEdits() {
+  const title = document.getElementById("edit-task-title").value.trim();
+  const description = document.getElementById("edit-task-description").value.trim();
+  const priority_level = parseInt(document.getElementById("edit-task-priority").value);
+  const subject_id = parseInt(document.getElementById("edit-task-subject").value);
+  const duedate = document.getElementById("edit-task-duedate").value.trim();
+  const updated = await updateTask(CURRENT_EDIT_TASK_ID, title, description, priority_level, subject_id, duedate);
+
+  if (updated) {
+    closeTaskEditor();
+    loadTasks(); // refresh your task list
+  }
+}
 
 function handleCreateTask() {
   const title = document.getElementById("task-title").value;
@@ -49,6 +109,18 @@ async function createTask(title, description, priority_level, subject_id, due_da
     return null;
   }
 
+  // Name length restriction
+  if (title.length > 100) {
+    alert("Task name cannot exceed 100 characters.");
+    return;
+  }
+
+  // Description length restriction
+  if (description.length > 500) {
+    alert("Task description cannot exceed 500 characters.");
+    return;
+  }
+
   const response = await fetch(`${TASKS_API}/tasks/tasks`, {
     method: "POST",
     headers: {
@@ -67,13 +139,12 @@ async function createTask(title, description, priority_level, subject_id, due_da
   const data = await response.json();
 
   if (!response.ok) {
-    document.getElementById("task-failmessage").textContent = data.message || "Task creation failed";
+    document.getElementById("task-failmessage").textContent =
+      data.message || "Task creation failed";
     return null;
   }
-
-  document.getElementById("task-message").textContent = "Task created successfully!";
-  return data;
 }
+
 async function toggleTaskComplete(id, completed) {
   const token = await getValidAccessToken();
   if (!token) {
@@ -150,9 +221,19 @@ async function loadTasks() {
     } else {
       item.innerHTML = `
         ${task.title} — ${scoreText}
+        ${task.description ? task.description : ""}
         <button onclick="calculateReadyScore(${task.id})">Calculate Ready Score</button>
         <button onclick="toggleTaskComplete(${task.id}, true)">Mark Done</button>
         <button onclick="deleteTask(${task.id}).then(() => loadTasks())">Delete</button>
+        <button onclick="openTaskEditor(
+          ${task.id},
+          '${task.title}',
+          '${task.description}',
+          ${task.priority_level},
+          ${task.subject_id},
+          '${task.due_date}'
+        )">Edit</button>
+
       `;
       activeList.appendChild(item);
     }
@@ -180,10 +261,22 @@ async function getTask(id) {
   return response.json();
 }
 
-async function updateTask(id, title, description) {
+async function updateTask(id, title, description, priority_level, subject_id, duedate) {
   const token = await getValidAccessToken();
   if (!token) {
     alert("Session expired. Please log in again.");
+    return null;
+  }
+
+  // Title length restriction
+  if (title.length > 100) {
+    alert("Task name cannot exceed 100 characters.");
+    return null;
+  }
+
+  // Description length restriction
+  if (description.length > 500) {
+    alert("Task description cannot exceed 500 characters.");
     return null;
   }
 
@@ -193,7 +286,13 @@ async function updateTask(id, title, description) {
       "Content-Type": "application/json",
       "Authorization": `Bearer ${token}`
     },
-    body: JSON.stringify({ title, description })
+    body: JSON.stringify({
+      title,
+      description,
+      priority_level,
+      subject_id,
+      due_date: duedate
+    })
   });
 
   const data = await response.json();
@@ -205,6 +304,7 @@ async function updateTask(id, title, description) {
 
   return data;
 }
+
 
 async function deleteTask(id) {
   const token = await getValidAccessToken();

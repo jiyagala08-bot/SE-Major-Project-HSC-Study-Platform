@@ -198,10 +198,33 @@ list.appendChild(subjectHeader);
 
 
 async function createAssessment() {
-  const subject_id = document.getElementById("assessment-subject").value;
-  const score = document.getElementById("assessment-mark").value;
-  const weight = document.getElementById("assessment-weight").value;
-  const due_date = document.getElementById("assessment-due-date").value;
+  const subject_id = parseInt(document.getElementById("assessment-subject").value);
+  const score = parseInt(document.getElementById("assessment-mark").value);
+  const weight = parseInt(document.getElementById("assessment-weight").value);
+  // Calculate existing total weight for this subject
+  const existingWeightTotal = ASSESSMENT_CACHE
+    .filter(a => a.subject_id === subject_id)
+    .reduce((sum, a) => sum + a.weight, 0);
+
+  // Check if adding this weight exceeds 100%
+  if (existingWeightTotal + weight > 100) {
+    alert(`Total weight for this subject cannot exceed 100%. 
+  Current total: ${existingWeightTotal}%. 
+  Adding ${weight}% would make it ${existingWeightTotal + weight}%.`);
+  return;
+}
+  // MARK RESTRICTIONS
+  if (isNaN(score) || score < 0 || score > 100) {
+    alert("Mark must be between 0 and 100.");
+    return;
+  }
+
+  // WEIGHT RESTRICTIONS
+  if (isNaN(weight) || weight <= 0 || weight > 100) {
+    alert("Weight must be between 0 and 100.");
+    return;
+  }
+
   const token = await getValidAccessToken();
   if (!token) {
     alert("Please log in first.");
@@ -215,7 +238,7 @@ async function createAssessment() {
       "Content-Type": "application/json",
       "Authorization": "Bearer " + token
     },
-      body: JSON.stringify({ subject_id: parseInt(subject_id), score: parseFloat(score), weight: parseFloat(weight), due_date })
+      body: JSON.stringify({ subject_id: parseInt(subject_id), score: parseFloat(score), weight: parseFloat(weight)})
   });
 
   if (res.ok) {
