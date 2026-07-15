@@ -12,6 +12,8 @@ function requireLogin() {
   return true;
 }
 
+let SUBJECT_CACHE = [];
+
 async function loadSubjects() {
   const token = await getValidAccessToken();
 
@@ -20,6 +22,8 @@ async function loadSubjects() {
   });
 
   const subjects = await res.json();
+
+  SUBJECT_CACHE = subjects;
 
   // Populate the assessment-subject select
   const select = document.getElementById("assessment-subject");
@@ -127,13 +131,16 @@ async function loadAssessments() {
   list.innerHTML = "";
 
   assessments.forEach(assessment => {
+    const subject = SUBJECT_CACHE.find(s => s.id === assessment.subject_id);
+    const subjectName = subject ? subject.name : `Unknown (${assessment.subject_id})`;
+
     const li = document.createElement("li");
     li.innerHTML = `
-      Subject ID: ${assessment.subject_id}, Mark: ${assessment.score}%, Weight: ${assessment.weight}%
+      Subject: ${subjectName}, Mark: ${assessment.score}%, Weight: ${assessment.weight}%
       <button onclick="deleteAssessment(${assessment.id})">Delete</button>
     `;
     list.appendChild(li);
-  });
+});
 }
 
 async function createAssessment() {

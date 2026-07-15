@@ -26,38 +26,43 @@
 
   <h1>Task Dashboard</h1>
   <p id="daily-quote"></p>
-  <h3> Create A Task</h3>
-  <!-- Create Task Form -->
-  <input id="task-title" placeholder="Task title">
-  <input id="task-description" placeholder="Task description">
-
-<select id="task-priority">
-  <option value="1">Low</option>
-  <option value="2">Medium</option>
-  <option value="3">High</option>
-</select>
+  <div class="containers-wrapper">
+    <div id="create-task-container" class="task-container">
+      <h3>Create A Task</h3>
+      <input id="task-title" placeholder="Task title">
+      <input id="task-description" placeholder="Task description">
+      <select id="task-priority">
+        <option value="1">Low</option>
+        <option value="2">Medium</option>
+        <option value="3">High</option>
+      </select>
 <select id="task-subject">
-  <option value="" disabled selected>Create a subject in 'profile' to enable subject selection</option>
-  <option value="1">Maths</option>
-  <option value="2">English</option>
-  <option value="3">Physics</option>
-</select>
-<p>*Create a subject in 'profile' to enable subject selection </p>
-<p> Due Date </p>
-<input type="date" id="task-due-date">
-<div id="task-message" style="color: green;"></div>
-<div id="task-failmessage" style="color: red;"></div>
-<button type="submit" id="create-task" onclick="handleCreateTask()">Create Task</button>
+      <option value="" disabled selected>Create a subject in 'profile' to enable subject selection</option>
+      <option value="1">Maths</option>
+      <option value="2">English</option>
+      <option value="3">Physics</option>
+    </select>
+    <p>*Create a subject in 'profile' to enable subject selection</p>
+    <p>Due Date</p>
+    <input type="date" id="task-due-date">
+    <div id="task-message" style="color: green;"></div>
+    <div id="task-failmessage" style="color: red;"></div>
+    <button type="submit" id="create-task" onclick="handleCreateTask()">Create Task</button>
+  </div>
+  <div id="active-tasks" class="task-active-container">
+    <h3>Active Tasks</h3>
+    <ul id="task-list"></ul>
+  </div>
 
-  <!-- Task List -->
-  <h3>Active Tasks</h3>
-  <ul id="task-list"></ul>
+  <div id="completed-tasks" class="task-complete-container">
+    <h3>Completed Tasks</h3>
+    <ul id="completed-task-list"></ul>
+  </div>
+</div>
 
-  <h3>Completed Tasks</h3>
-  <ul id="completed-task-list"></ul>
-
-  <h3>Assessments</h3>
-
+<div class = "assessments-wrapper">
+  <div class = "create-assmnt-container">
+  <h3>Add An Assessment</h3>
   <p> Subject </p>
   <select id="assessment-subject">
   <option value="1">Maths</option>
@@ -78,9 +83,13 @@
   <p>Due Date</p>
   <input type="date" id="assessment-due-date">
   <button id="addassessment" onclick="createAssessment()">Add Assessment</button>
+  </div>
 
+  <div class = "assmnt-container">
   <h3>Your Assessments</h3>
   <ul id="assessment-list"></ul>
+  </div>
+</div>
 
   <script src="/project_frontend/js/auth.js"></script>
   <script src="/project_frontend/js/subjects.js"></script>

@@ -28,7 +28,7 @@ login_model = auth_ns.model(
 
 EMAIL_REGEX = r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
 USERNAME_REGEX = r"^[A-Za-z0-9\s-]{3,30}$"
-PASSWORD_REGEX = r"^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+]).{8,50}$"
+PASSWORD_REGEX = r"^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*()_+]).{8,50}$"
 
 
 @auth_ns.route('/signup')

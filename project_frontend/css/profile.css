@@ -156,12 +156,6 @@ p{
   align-items: center;
 }
 
-#task-message {
-  text-align: center;
-  font-size: 1rem;
-  margin-top: 10px;
-}
-
 #subject-list {
   list-style: none;
   counter-reset: subject-counter;
@@ -261,6 +255,11 @@ p{
   max-width: 1200px;
   margin: 0 auto 30px;
   padding: 0 15px;
+}
+@media (max-width: 768px) {
+  .containers-wrapper {
+    flex-direction: column;
+  }
 }
 
 #profile-information {

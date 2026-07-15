@@ -181,7 +181,85 @@ p{
   font-size: 1rem;
   margin-top: 10px;
 }
-
+.task-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  padding: 15px 30px;
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 10px;
+  flex: 1;
+  min-width: 350px;
+}
+.task-active-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  padding: 15px 30px;
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 10px;
+  flex: 1;
+  min-width: 350px;
+}
+.task-complete-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  padding: 15px 30px;
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 10px;
+  flex: 1;
+  min-width: 350px;
+}
+.containers-wrapper {
+  display: flex;
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto 30px;
+  padding: 0 15px;
+}
+@media (max-width: 768px) {
+  .containers-wrapper {
+    flex-direction: column;
+  }
+}
+.create-assmnt-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  padding: 15px 30px;
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 10px;
+  flex: 1;
+  min-width: 350px;
+}
+.assmnt-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  padding: 15px 30px;
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 10px;
+  flex: 1;
+  min-width: 350px;
+}
+.assessments-wrapper {
+  display: flex;
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto 30px;
+  padding: 0 15px;
+}
+@media (max-width: 768px) {
+  .assessments-wrapper {
+    flex-direction: column;
+  }
+}
 #task-list {
   text-align: left;
   font-size: 1.3rem;
@@ -198,6 +276,26 @@ p{
   counter-increment: task-counter;
 }
 #task-list li::before {
+  content: counter(task-counter) ". ";
+  font-weight: bold;
+  color: #A98B76;
+}
+#completed-task-list {
+  text-align: left;
+  font-size: 1.3rem;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  color: #000;
+  font-family: "Playfair Display", serif;
+  list-style: none;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+#completed-task-list li {
+  counter-increment: task-counter;
+}
+#completed-task-list li::before {
   content: counter(task-counter) ". ";
   font-weight: bold;
   color: #A98B76;
