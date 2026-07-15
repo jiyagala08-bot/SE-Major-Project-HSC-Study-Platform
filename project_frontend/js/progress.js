@@ -172,11 +172,31 @@ async function loadProgressSummary() {
   
   // Only update if the element actually exists on the page
   if (progressBar) {
-    // Format the number to 1 decimal place to match your text summary
-    const formattedPercent = percentComplete.toFixed(1); 
+  // Format the number to 1 decimal place to match your text summary
+  const formattedPercent = percentComplete.toFixed(1); 
     
-    progressBar.style.width = formattedPercent + "%";
-    progressBar.textContent = formattedPercent + "%";
+  progressBar.style.width = formattedPercent + "%";
+  progressBar.textContent = formattedPercent + "%";
+  }
+    if (percentComplete < 20) {
+    summaryEl.textContent = `Procrasrination at its peak. *smh*!`;
+    return;
+  }
+  if (percentComplete >= 20 && percentComplete < 40) {
+    summaryEl.textContent = `Do better.`;
+    return;
+  }
+  if (percentComplete >= 40 && percentComplete < 60) {
+    summaryEl.textContent = `Were you born for mediocrity or did that become the plan along the way?`;
+    return;
+  }
+  if (percentComplete >= 60 && percentComplete < 100) {
+    summaryEl.textContent = `There might be hope for you yet.`;
+    return;
+  }
+  if (percentComplete === 100) {
+    summaryEl.textContent = `Acceptable Progress. Any chance you forgot to add some tasks?`;
+    return;
   }
 }
 document.addEventListener("DOMContentLoaded", () => {

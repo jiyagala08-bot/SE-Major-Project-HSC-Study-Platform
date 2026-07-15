@@ -375,6 +375,17 @@ p{
     font-weight: bold;
     border-radius: 10px 0 0 10px;
   }
+  #progress-summary {
+  font-family: serif;
+  font-style: italic;
+  font-weight: bold;
+  font-size: 18px;
+  line-height: 1.5;
+  color: #B2AC88;      
+  text-align: center;     
+  margin-top: 15px;       
+  padding: 0 10px;         
+}
 /* Footer container */
 .footer {
   display: flex;
