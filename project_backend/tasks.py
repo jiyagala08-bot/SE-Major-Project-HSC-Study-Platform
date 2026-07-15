@@ -42,8 +42,9 @@ class TaskListResource(Resource):
         """Get all tasks"""
         current_user = get_jwt_identity()
         tasks = (Task.query
+                 .options(joinedload(Task.subject))
                  .filter_by(user_id=current_user)
-                 .order_by(Task.priority_level.desc())
+                 .order_by(Task.priority_level.desc(), Task.ready_score.asc())
                  .all())
         if not tasks:
             return {"message": "No tasks found"}, 404
