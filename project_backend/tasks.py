@@ -18,7 +18,8 @@ task_model = task_ns.model(
         'subject_id': fields.Integer(),
         'user_id': fields.Integer(),
         'completed': fields.Boolean(),
-        'ready_score': fields.Float()
+        'ready_score': fields.Float(),
+        'due_date': fields.String()
     }
 )
 
