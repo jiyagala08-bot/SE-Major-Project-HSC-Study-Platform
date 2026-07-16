@@ -203,7 +203,7 @@ p{
   flex: 1;
   min-width: 350px;
 }
-.task-active-container {
+.calendar-view-container {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -214,17 +214,7 @@ p{
   flex: 1;
   min-width: 350px;
 }
-.task-complete-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  text-align: center;
-  padding: 15px 30px;
-  background-color: rgba(255, 255, 255, 0.8);
-  border-radius: 10px;
-  flex: 1;
-  min-width: 350px;
-}
+
 .containers-wrapper {
   display: flex;
   gap: 20px;
