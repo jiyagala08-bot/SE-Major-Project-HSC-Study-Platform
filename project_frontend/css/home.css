@@ -227,6 +227,13 @@ p{
     flex-direction: column;
   }
 }
+.calendar-bucket {
+  margin-bottom: 20px;
+}
+.calendar-bucket h3 {
+  color: #A98B76;
+  margin-bottom: 8px;
+}
 .create-assmnt-container {
   display: flex;
   flex-direction: column;
