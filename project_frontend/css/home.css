@@ -364,6 +364,13 @@ p{
   color: #555;
   margin: 5px 0;
 }
+.calendar-bucket {
+  margin-bottom: 20px;
+}
+.calendar-bucket h3 {
+  color: #A98B76;
+  margin-bottom: 8px;
+}
 /* Footer container */
 .footer {
   display: flex;

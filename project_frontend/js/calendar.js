@@ -1,0 +1,106 @@
+function parseDateOnly(dateStr) {
+  // Avoids timezone shift issues from new Date("YYYY-MM-DD") being parsed as UTC
+  const [year, month, day] = dateStr.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
+
+function startOfDay(date) {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+function getMonday(date) {
+  const d = startOfDay(date);
+  const day = d.getDay(); // 0 = Sunday, 1 = Monday, ...
+  const diff = day === 0 ? -6 : 1 - day; // shift Sunday back to previous Monday
+  d.setDate(d.getDate() + diff);
+  return d;
+}
+
+function addDays(date, days) {
+  const d = new Date(date);
+  d.setDate(d.getDate() + days);
+  return d;
+}
+
+function getBucket(dueDateStr) {
+  if (!dueDateStr) return "No due date";
+
+  const today = startOfDay(new Date());
+  const due = parseDateOnly(dueDateStr);
+
+  const thisMonday = getMonday(today);
+  const thisSunday = addDays(thisMonday, 6);
+  const nextMonday = addDays(thisMonday, 7);
+  const nextSunday = addDays(thisMonday, 13);
+
+  const thisMonthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+  const nextMonthStart = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+  const monthAfterNextStart = new Date(today.getFullYear(), today.getMonth() + 2, 1);
+
+  if (due < today) return "Overdue";
+  if (due.getTime() === today.getTime()) return "Today";
+  if (due.getTime() === addDays(today, 1).getTime()) return "Tomorrow";
+  if (due >= today && due <= thisSunday) return "This Week";
+  if (due >= nextMonday && due <= nextSunday) return "Next Week";
+  if (due >= thisMonthStart && due < nextMonthStart) return "This Month";
+  if (due >= nextMonthStart && due < monthAfterNextStart) return "Next Month";
+  return "Later";
+}
+
+const BUCKET_ORDER = ["Overdue", "Today", "Tomorrow", "This Week", "Next Week", "This Month", "Next Month", "Later", "No due date"];
+
+async function loadCalendarView() {
+  const tasks = await getTasks();
+  const container = document.getElementById("calendar-view");
+  if (!container) return;
+  container.innerHTML = "";
+
+  const activeTasks = tasks.filter(t => !t.completed);
+
+  const grouped = {};
+  BUCKET_ORDER.forEach(b => grouped[b] = []);
+  activeTasks.forEach(task => {
+    const bucket = getBucket(task.due_date);
+    grouped[bucket].push(task);
+  });
+
+  const priorityLabels = { 1: "Low", 2: "Medium", 3: "High" };
+
+  BUCKET_ORDER.forEach(bucket => {
+    const tasksInBucket = grouped[bucket];
+    if (tasksInBucket.length === 0) return; // skip empty buckets
+
+    const section = document.createElement("div");
+    section.classList.add("calendar-bucket");
+
+    const heading = document.createElement("h3");
+    heading.textContent = bucket;
+    section.appendChild(heading);
+
+    const list = document.createElement("ul");
+    tasksInBucket.forEach(task => {
+      const li = document.createElement("li");
+      const scoreText = task.ready_score != null ? `Readiness: ${task.ready_score.toFixed(1)}%` : "Ready score not calculated";
+      const priorityText = priorityLabels[task.priority_level] || "Not set";
+
+      li.innerHTML = `
+        ${task.title} - ${scoreText}
+        <div class="task-details">
+          <span>Priority: ${priorityText}</span>
+          <span>Due: ${task.due_date || "Not set"}</span>
+          <span>Subject: ${task.subject_name || "No subject"}</span>
+        </div>
+      `;
+      list.appendChild(li);
+    });
+
+    section.appendChild(list);
+    container.appendChild(section);
+  });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  loadCalendarView();
+});
