@@ -1,3 +1,35 @@
+const TASKS_API = "https://improved-space-yodel-r7gr699jrr662wwjj-5000.app.github.dev";
+
+function getToken() {
+  return localStorage.getItem("access_token");
+}
+
+async function getTasks() {
+  const token = await getValidAccessToken();
+  if (!token) {
+    console.error("No valid access token available for task fetch");
+    // Redirect to login so user can re-authenticate
+    window.location.href = "/project_frontend/html/logon.html";
+    return [];
+  }
+
+  const response = await fetch(`${TASKS_API}/tasks/tasks`, {
+    method: "GET",
+    headers: {
+      "Authorization": `Bearer ${token}`
+    }
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error("Failed to fetch tasks", response.status, errorText);
+    return [];
+  }
+
+  return response.json();
+}
+let CURRENT_EDIT_TASK_ID = null;
+
 function parseDateOnly(dateStr) {
   // Avoids timezone shift issues from new Date("YYYY-MM-DD") being parsed as UTC
   const [year, month, day] = dateStr.split("-").map(Number);
@@ -51,6 +83,52 @@ function getBucket(dueDateStr) {
 
 const BUCKET_ORDER = ["Overdue", "Today", "Tomorrow", "This Week", "Next Week", "This Month", "Next Month", "Later", "No due date"];
 
+async function deleteTask(id) {
+  const token = await getValidAccessToken();
+  if (!token) {
+    alert("Session expired. Please log in again.");
+    return false;
+  }
+
+  const response = await fetch(`${TASKS_API}/tasks/tasks/${id}`, {
+    method: "DELETE",
+    headers: {
+      "Authorization": `Bearer ${token}`
+    }
+  });
+
+  if (!response.ok) {
+    alert("Failed to delete task");
+    return false;
+  }
+
+  return true;
+}
+
+async function toggleTaskComplete(id, completed) {
+  const token = await getValidAccessToken();
+  if (!token) {
+    alert("Session expired. Please log in again.");
+    return;
+  }
+
+  const response = await fetch(`${TASKS_API}/tasks/tasks/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+    body: JSON.stringify({ completed })
+  });
+
+  if (!response.ok) {
+    alert("Failed to update task");
+    return;
+  }
+
+  await loadTasks();
+}
+
 async function loadCalendarView() {
   const tasks = await getTasks();
   const container = document.getElementById("calendar-view");
@@ -91,6 +169,8 @@ async function loadCalendarView() {
           <span>Priority: ${priorityText}</span>
           <span>Due: ${task.due_date || "Not set"}</span>
           <span>Subject: ${task.subject_name || "No subject"}</span>
+          <button onclick="toggleTaskComplete(${task.id}, true)">Mark Done</button>
+          <button onclick="deleteTask(${task.id}).then(() => loadTasks())">Delete</button>
         </div>
       `;
       list.appendChild(li);
