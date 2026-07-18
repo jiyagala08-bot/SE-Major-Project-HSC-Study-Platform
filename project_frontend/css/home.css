@@ -371,6 +371,25 @@ p{
   color: #A98B76;
   margin-bottom: 8px;
 }
+
+.calendar-bucket ul {
+  list-style: none;
+  counter-reset: calendar-counter;
+  padding: 0;
+  margin: 0;
+}
+
+.calendar-bucket li {
+  counter-increment: calendar-counter;
+  color: #000;
+  font-size: 1.5rem;
+}
+
+.calendar-bucket li::before {
+  content: counter(calendar-counter) ". ";
+  font-weight: bold;
+  color: #A98B76;
+}
 /* Footer container */
 .footer {
   display: flex;

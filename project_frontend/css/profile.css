@@ -184,7 +184,7 @@ p{
 }
 
 #subject-list li::before {
-  content: counter(subject-counter) ". ";
+  content: "★ ";
   font-weight: bold;
   color: #A98B76;
   display: inline-block;
