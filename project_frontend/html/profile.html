@@ -24,7 +24,7 @@
 </header>
 <main>
   
-  <div id="subject-edit-overlay" style="
+<div id="subject-edit-overlay" style="
     display:none;
     position:fixed;
     top:0;
@@ -34,7 +34,7 @@
     background:rgba(0,0,0,0.5);
     z-index:9998;
 "></div>
-  <div id="subject-edit-popup" class="subject-edit-popup" style="
+<div id="subject-edit-popup" class="subject-edit-popup" style="
     display:none;
     position:fixed;
     top:50%;
@@ -47,26 +47,27 @@
     box-shadow:0 0 20px rgba(0,0,0,0.3);
     z-index:9999;
   ">
-  <h3>Edit Task</h3>
-  <p> Task Name </p>
+  <h3>Edit Subject</h3>
+  <p>Subject Name</p>
   <input id="edit-subject-name" type="text" maxlength="100">
 
-  <p> Difficulty Level </p>
-  <option value="" disabled selected>Difficulty (1 = easiest, 10 = hardest)</option>
-  <option value="1">1</option>
-  <option value="2">2</option>
-  <option value="3">3</option>
-  <option value="4">4</option>
-  <option value="5">5</option>
-  <option value="6">6</option>
-  <option value="7">7</option>
-  <option value="8">8</option>
-  <option value="9">9</option>
-  <option value="10">10</option>
+  <p>Difficulty Level</p>
+  <select id="edit-subject-difficulty">
+    <option value="" disabled selected>Difficulty (1 = easiest, 10 = hardest)</option>
+    <option value="1">1</option>
+    <option value="2">2</option>
+    <option value="3">3</option>
+    <option value="4">4</option>
+    <option value="5">5</option>
+    <option value="6">6</option>
+    <option value="7">7</option>
+    <option value="8">8</option>
+    <option value="9">9</option>
+    <option value="10">10</option>
   </select>
 
-  <button id = "edit-task" onclick="saveTaskEdits()">Save</button>
-  <button id = "cancel-edit" onclick="closeTaskEditor()">Cancel</button>
+  <button id="edit-subject" onclick="saveSubjectEdits()">Save</button>
+  <button id="cancel-edit" onclick="closeSubjectEditor()">Cancel</button>
 </div>
 
 <h1> Profile</h1>
@@ -98,7 +99,7 @@
   <p>Subject Name</p>
   <input id="subject-name" placeholder="Subject name">
   <p>Subject difficulty level (1-10, 10 being the hardest)</p>
-  <select id="edit-subject-difficulty" placeholder="Difficulty level, where 1 is easiest and 10 is hardest">
+  <select id="subject-priority" placeholder="Difficulty level, where 1 is easiest and 10 is hardest">
   <option value="" disabled selected>Difficulty (1 = easiest, 10 = hardest)</option>
   <option value="1">1</option>
   <option value="2">2</option>
@@ -129,6 +130,7 @@
 
   <ul class ="Login">
   <li><a href="logon.html"> Logout </a></li>
+  </ul>
 </main>
 
 </body>

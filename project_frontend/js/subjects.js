@@ -16,11 +16,11 @@ let SUBJECT_CACHE = [];
 let ASSESSMENT_CACHE = [];
 let CURRENT_EDIT_SUBJECT_ID = null;
 
-function openSubjectEditor(id, title, description, priority_level, subject_id, due_date) {
+function openSubjectEditor(id, name, difficulty_level) {
   CURRENT_EDIT_SUBJECT_ID = id;
 
   document.getElementById("edit-subject-name").value = name;
-  document.getElementById("edit-subject-difficulty_level").value = difficulty_level;
+  document.getElementById("edit-subject-difficulty").value = difficulty_level;
 
   document.getElementById("subject-edit-overlay").style.display = "block";
   document.getElementById("subject-edit-popup").style.display = "block";
@@ -84,7 +84,7 @@ async function loadSubjects() {
     <button onclick="openSubjectEditor(
         ${sub.id},
         '${sub.name}',
-        ${sub.difficulty_level},
+        ${sub.difficulty_level}
       )">Edit</button>
     `;
   list.appendChild(li);
@@ -160,29 +160,27 @@ async function updateSubject(id, name, difficulty_level) {
     return null;
   }
 
-  // Name length restriction
   if (name.length > 100) {
     alert("Subject name cannot exceed 100 characters.");
     return null;
   }
 
-  const res = await fetch(`${SUBJECTS_API}/subjects/subjects`, {
+  const res = await fetch(`${SUBJECTS_API}/subjects/subjects/${id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
       "Authorization": "Bearer " + token
     },
-    body: JSON.stringify({name, difficulty_level })
+    body: JSON.stringify({ name, difficulty_level })
   });
 
-  const data = await Response.json();
+  const data = await res.json();
 
-  if (!response.ok) {
-    alert(data.message || "Failed to update task");
+  if (!res.ok) {
+    alert(data.message || "Failed to update subject");
     return null;
   }
   return data;
-
 }
 
 async function saveSubjectEdits() {
@@ -239,6 +237,7 @@ async function loadAssessments() {
   ASSESSMENT_CACHE = assessments;
 
   const list = document.getElementById("assessment-list");
+  if (!list) return; // Element doesn't exist on this page
   list.innerHTML = "";
 
   // Group assessments by subject_id

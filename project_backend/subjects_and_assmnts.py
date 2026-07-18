@@ -77,7 +77,7 @@ class SubjectResource(Resource):
         if subject.user_id != int(current_user):
             return{"message" : "Forbidden"}, 403
         subject.name = data.get('name', subject.name)
-        subject.difficuly_level = data.get('difficulty_level', subject.difficulty_level)
+        subject.difficutly_level = data.get('difficulty_level', subject.difficulty_level)
         subject.save()
         return {"message": "Subject updated", "id": id}, 200
     
