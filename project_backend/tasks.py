@@ -30,9 +30,17 @@ task_input = task_ns.model(
         'title': fields.String(required=True),
         'description': fields.String(required=True),
         'priority_level': fields.Integer(),
-        'subject_id': fields.Integer()
+        'subject_id': fields.Integer(),
+        'due_date': fields.String()
     }
 )
+def parse_due_date(value):
+    if not value:
+        return date.today()
+    try:
+        return date.fromisoformat(value)
+    except ValueError:
+        return date.today()
 
 @task_ns.route('/tasks')
 class TaskListResource(Resource):
@@ -70,7 +78,7 @@ class TaskListResource(Resource):
             priority_level=data.get('priority_level'),
             subject_id=data.get('subject_id'),
             user_id=current_user,
-            due_date=date.today()
+            due_date=parse_due_date(data.get('due_date'))
         )
         new_task.save()
         return new_task, 201
@@ -102,6 +110,8 @@ class TaskResource(Resource):
         task_to_update.priority_level = data.get('priority_level', task_to_update.priority_level)
         task_to_update.subject_id = data.get('subject_id', task_to_update.subject_id)
         task_to_update.completed = data.get('completed', task_to_update.completed)
+        if 'due_date' in data:
+            task_to_update.due_date = parse_due_date(data.get('due_date'))
         task_to_update.save()
         return task_to_update
 
