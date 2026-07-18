@@ -125,6 +125,18 @@ p{
   height: 50px;
 }
 
+/* Input fields */
+#edit-task-title, #edit-task-description, #edit-task-priority, #edit-task-subject, #edit-task-duedate, #edit-task-hours, #task-hours {
+  color: #000;
+  display: block;
+  margin: 10px auto;
+  width: 300px;
+  height: 50px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 2px solid #BABF94;
+}
+
 #clear-tasks-btn, #lgout, #addassessment, #edit-task, #cancel-edit {
   width: 100px;
   height: 50px;
@@ -145,7 +157,7 @@ p{
   align-items: center;
 }
 
-#create-task,  #createsub, #addassessment {
+#create-task,  #createsub, #addassessment, #edit-task, #cancel-edit {
   width: 100px;
   height: 50px;
   cursor: pointer;

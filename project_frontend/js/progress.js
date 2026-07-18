@@ -4,6 +4,8 @@ function getToken() {
   return localStorage.getItem("access_token");
 }
 
+let CURRENT_EDIT_TASK_ID = null;
+
 async function getTasks() {
   const token = await getValidAccessToken();
   if (!token) {
@@ -28,7 +30,122 @@ async function getTasks() {
 
   return response.json();
 }
-let CURRENT_EDIT_TASK_ID = null;
+
+async function loadSubjectsIntoEditSelect() {
+  const token = await getValidAccessToken();
+  if (!token) return;
+
+  const response = await fetch(`${TASKS_API}/subjects/subjects`, {
+    headers: { "Authorization": `Bearer ${token}` }
+  });
+
+  if (!response.ok) return;
+
+  const subjects = await response.json();
+  const select = document.getElementById("edit-task-subject");
+  select.innerHTML = "";
+
+  subjects.forEach(sub => {
+    const option = document.createElement("option");
+    option.value = sub.id;
+    option.textContent = sub.name;
+    select.appendChild(option);
+  });
+}
+
+function openTaskEditor(id, title, description, priority_level, subject_id, due_date) {
+  CURRENT_EDIT_TASK_ID = id;
+
+  // Load subjects into the dropdown
+  loadSubjectsIntoEditSelect().then(() => {
+    document.getElementById("edit-task-subject").value = subject_id;
+  });
+
+  document.getElementById("edit-task-title").value = title;
+  document.getElementById("edit-task-description").value = description;
+  document.getElementById("edit-task-priority").value = priority_level;
+  document.getElementById("edit-task-duedate").value = due_date;
+
+    document.getElementById("task-edit-overlay").style.display = "block";
+  document.getElementById("task-edit-popup").style.display = "block";
+}
+
+
+function closeTaskEditor() {
+  document.getElementById("task-edit-popup").style.display = "none";
+  document.getElementById("task-edit-overlay").style.display = "none";
+  CURRENT_EDIT_TASK_ID = null;
+}
+async function saveTaskEdits() {
+  const title = document.getElementById("edit-task-title").value.trim();
+  const description = document.getElementById("edit-task-description").value.trim();
+  const priority_level = parseInt(document.getElementById("edit-task-priority").value);
+  const subject_id = parseInt(document.getElementById("edit-task-subject").value);
+  const duedate = document.getElementById("edit-task-duedate").value.trim();
+  const hours = parseFloat(document.getElementById("edit-task-hours").value);
+
+  const updated = await updateTask(CURRENT_EDIT_TASK_ID, title, description, priority_level, subject_id, duedate);
+
+  if (updated) {
+    // recalc ready score automatically
+    await calculateReadyScore(CURRENT_EDIT_TASK_ID, hours);
+    closeTaskEditor();
+    loadTasks();
+  }
+}
+
+function handleCreateTask() {
+  const title = document.getElementById("task-title").value;
+  const description = document.getElementById("task-description").value;
+  const priority_level = parseInt(document.getElementById("task-priority").value);
+  const subject_id = parseInt(document.getElementById("task-subject").value);
+  const due_date = document.getElementById("task-due-date").value;
+  
+  createTask(title, description, priority_level, subject_id, due_date)
+    .then(async (task) => {
+      if (task) {
+        const hours = parseFloat(document.getElementById("task-hours").value);
+        await calculateReadyScore(task.id, hours);
+        loadTasks();
+      }
+    });
+}
+
+async function createTask(title, description, priority_level, subject_id, due_date) {
+  const token = await getValidAccessToken();
+  if (!token) {
+    alert("Session expired. Please log in again.");
+    window.location.href = "/project_frontend/html/logon.html";
+    return null;
+  }
+
+  const response = await fetch(`${TASKS_API}/tasks/tasks`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+    body: JSON.stringify({
+      title,
+      description,
+      priority_level,
+      subject_id,
+      due_date
+    })
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    document.getElementById("task-failmessage").textContent =
+      data.message || "Task creation failed";
+    return null;
+  }
+
+  return data;
+}
+
+
 
 async function toggleTaskComplete(id, completed) {
   const token = await getValidAccessToken();
@@ -53,6 +170,32 @@ async function toggleTaskComplete(id, completed) {
 
   await loadTasks();
 }
+async function calculateReadyScore(id, hours) {
+  if (isNaN(hours) || hours < 0) {
+    alert("Please enter a valid number of hours before calculating.");
+    return;
+  }
+
+  saveHoursLocally(id, hours);
+  const token = await getValidAccessToken();
+  if (!token) return;
+
+  const response = await fetch(`${TASKS_API}/tasks/tasks/${id}/ready-score`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+    body: JSON.stringify({ timeinput: hours })
+  });
+
+  if (!response.ok) {
+    alert("Failed to calculate ready score");
+    return;
+  }
+
+  await loadTasks();
+}
 
 async function loadTasks() {
   const tasks = await getTasks();
@@ -68,10 +211,13 @@ async function loadTasks() {
     const scoreText = task.ready_score != null ? `Readiness: ${task.ready_score.toFixed(1)}%` : "Ready score not calculated";
     const priorityText = priorityLabels[task.priority_level] || "Not set";
     const dueDateText = task.due_date || "Not set";
+    const hoursText = getSavedHours(task.id) || "Not set";
+
     const detailsHtml = `
       <div class="task-details">
         <span>Priority: ${priorityText}</span>
         <span>Due: ${dueDateText}</span>
+        <span>Est. hours: ${hoursText}</span>
         <span>Subject: ${task.subject_name || "No subject"}</span>
       </div>
     `;
@@ -95,8 +241,17 @@ async function loadTasks() {
         ${task.title} - ${scoreText}
         ${detailsHtml}
         ${descHtml}
+        <button onclick="calculateReadyScore(${task.id}, parseFloat(getSavedHours(${task.id})))">Calculate Ready Score</button>
         <button onclick="toggleTaskComplete(${task.id}, true)">Mark Done</button>
         <button onclick="deleteTask(${task.id}).then(() => loadTasks())">Delete</button>
+        <button onclick="openTaskEditor(
+          ${task.id},
+          '${task.title}',
+          '${task.description}',
+          ${task.priority_level},
+          ${task.subject_id},
+          '${task.due_date}'
+        )">Edit</button>
       `;
       activeList.appendChild(item);
     }
@@ -124,6 +279,51 @@ async function getTask(id) {
   return response.json();
 }
 
+async function updateTask(id, title, description, priority_level, subject_id, duedate) {
+  const token = await getValidAccessToken();
+  if (!token) {
+    alert("Session expired. Please log in again.");
+    return null;
+  }
+
+  // Title length restriction
+  if (title.length > 100) {
+    alert("Task name cannot exceed 100 characters.");
+    return null;
+  }
+
+  // Description length restriction
+  if (description.length > 500) {
+    alert("Task description cannot exceed 500 characters.");
+    return null;
+  }
+
+  const response = await fetch(`${TASKS_API}/tasks/tasks/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+    body: JSON.stringify({
+      title,
+      description,
+      priority_level,
+      subject_id,
+      due_date: duedate
+    })
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    alert(data.message || "Failed to update task");
+    return null;
+  }
+
+  return data;
+}
+
+
 async function deleteTask(id) {
   const token = await getValidAccessToken();
   if (!token) {
@@ -145,9 +345,44 @@ async function deleteTask(id) {
 
   return true;
 }
+
+async function loadSubjectsIntoSelect() {
+  const token = await getValidAccessToken();
+  if (!token) {
+    window.location.href = "/project_frontend/html/logon.html";
+    return;
+  }
+
+  const response = await fetch(`${TASKS_API}/subjects/subjects`, {
+    headers: { "Authorization": `Bearer ${token}` }
+  });
+
+  if (!response.ok) return;
+
+  const subjects = await response.json();
+  const select = document.getElementById("task-subject");
+  select.innerHTML = ""; // Clear existing
+
+  subjects.forEach(sub => {
+    const option = document.createElement("option");
+    option.value = sub.id;
+    option.textContent = sub.name;
+    select.appendChild(option);
+  });
+}
+function saveHoursLocally(taskId, hours) {
+  localStorage.setItem(`task-hours-${taskId}`, hours);
+}
+
+function getSavedHours(taskId) {
+  return localStorage.getItem(`task-hours-${taskId}`) || "";
+}
+
 document.addEventListener("DOMContentLoaded", () => {
-  if (!requireLogin()) return;
-  loadTasks();});
+  loadTasks();
+  loadSubjectsIntoSelect();
+  loadSubjects(); // Populate assessment-subject select and assessment list
+});
 
 async function loadProgressSummary() {
   const tasks = await getTasks();
