@@ -68,6 +68,18 @@ class SubjectResource(Resource):
         subject = Subject.query.filter_by(id=id, user_id=current_user).first_or_404()
         cumulative_score = subject.calculate_cumulative_score()
         return {"cumulative_score": cumulative_score}, 200
+    @jwt_required()
+    def put(self, id):
+        """Update a subject by id"""
+        current_user = get_jwt_identity()
+        subject = Subject.query.filter_by(id=id, user_id=current_user).first_or_404()
+        data = request.get_json() or {}
+        if subject.user_id != int(current_user):
+            return{"message" : "Forbidden"}, 403
+        subject.name = data.get('name', subject.name)
+        subject.difficuly_level = data.get('difficulty_level', subject.difficulty_level)
+        subject.save()
+        return {"message": "Subject updated", "id": id}, 200
     
 
 assessment_ns=Namespace('assessments', description='A namespace for assessments')

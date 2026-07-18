@@ -14,6 +14,22 @@ function requireLogin() {
 
 let SUBJECT_CACHE = [];
 let ASSESSMENT_CACHE = [];
+let CURRENT_EDIT_SUBJECT_ID = null;
+
+function openSubjectEditor(id, title, description, priority_level, subject_id, due_date) {
+  CURRENT_EDIT_SUBJECT_ID = id;
+
+  document.getElementById("edit-subject-name").value = name;
+  document.getElementById("edit-subject-difficulty_level").value = difficulty_level;
+
+  document.getElementById("subject-edit-overlay").style.display = "block";
+  document.getElementById("subject-edit-popup").style.display = "block";
+}
+function closeSubjectEditor() {
+  document.getElementById("subject-edit-popup").style.display = "none";
+  document.getElementById("subject-edit-overlay").style.display = "none";
+  CURRENT_EDIT_SUBJECT_ID = null;
+}
 
 async function loadSubjects() {
   const token = await getValidAccessToken();
@@ -65,7 +81,12 @@ async function loadSubjects() {
     ${avg ? `(${calculateGrade(avg)})` : ""}
     (difficulty: ${getDifficultyLabel(sub.difficulty_level)} - ${sub.difficulty_level})
     <button onclick="deleteSubject(${sub.id})">Delete</button>
-  `;
+    <button onclick="openSubjectEditor(
+        ${sub.id},
+        '${sub.name}',
+        ${sub.difficulty_level},
+      )">Edit</button>
+    `;
   list.appendChild(li);
 });
 }
@@ -99,6 +120,12 @@ async function createSubject() {
     alert("Please fill in both subject name and difficulty level");
     return;
   }
+
+  // Name length restriction
+  if (name.length > 100) {
+    alert("Task name cannot exceed 100 characters.");
+    return null;
+  }
   
   const token = await getValidAccessToken();
   if (!token) {
@@ -125,6 +152,51 @@ async function createSubject() {
     alert(data.message || data.msg || JSON.stringify(data));
   }
 }
+
+async function updateSubject(id, name, difficulty_level) {
+  const token = await getValidAccessToken();
+  if (!token) {
+    alert("Session expired. Please log in again.");
+    return null;
+  }
+
+  // Name length restriction
+  if (name.length > 100) {
+    alert("Subject name cannot exceed 100 characters.");
+    return null;
+  }
+
+  const res = await fetch(`${SUBJECTS_API}/subjects/subjects`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + token
+    },
+    body: JSON.stringify({name, difficulty_level })
+  });
+
+  const data = await Response.json();
+
+  if (!response.ok) {
+    alert(data.message || "Failed to update task");
+    return null;
+  }
+  return data;
+
+}
+
+async function saveSubjectEdits() {
+  const name = document.getElementById("edit-subject-name").value.trim();
+  const difficulty_level = parseInt(document.getElementById("edit-subject-difficulty").value);
+
+  const updated = await updateSubject(CURRENT_EDIT_SUBJECT_ID, name, difficulty_level);
+
+  if (updated) {
+    closeSubjectEditor();
+    loadSubjects();
+  }
+}
+
 function calculateSubjectWeightedAverage(subjectId) {
   const subjectAssessments = ASSESSMENT_CACHE.filter(a => a.subject_id === subjectId);
 

@@ -114,7 +114,7 @@ p{
 }
 
 /* Input fields */
-#subject-name, #subject-priority, #profile-name, #profile-school-year, #profile-birthdate {
+#subject-name, #subject-priority, #profile-name, #profile-school-year, #profile-birthdate, #edit-subject-name, #edit-subject-difficulty {
   color: #000;
   display: block;
   margin: 10px auto;
@@ -136,7 +136,7 @@ p{
   height: 50px;
 }
 
-#createsub, #save-profile {
+#createsub, #save-profile, #edit-subject, #cancel-edit {
   width: 100px;
   height: 50px;
   cursor: pointer;
