@@ -1,34 +1,8 @@
-const TASKS_API = "https://improved-space-yodel-r7gr699jrr662wwjj-5000.app.github.dev";
+const CALENDAR_API = "https://improved-space-yodel-r7gr699jrr662wwjj-5000.app.github.dev";
 
 function getToken() {
   return localStorage.getItem("access_token");
 }
-
-async function getTasks() {
-  const token = await getValidAccessToken();
-  if (!token) {
-    console.error("No valid access token available for task fetch");
-    // Redirect to login so user can re-authenticate
-    window.location.href = "/project_frontend/html/logon.html";
-    return [];
-  }
-
-  const response = await fetch(`${TASKS_API}/tasks/tasks`, {
-    method: "GET",
-    headers: {
-      "Authorization": `Bearer ${token}`
-    }
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error("Failed to fetch tasks", response.status, errorText);
-    return [];
-  }
-
-  return response.json();
-}
-let CURRENT_EDIT_TASK_ID = null;
 
 function parseDateOnly(dateStr) {
   // Avoids timezone shift issues from new Date("YYYY-MM-DD") being parsed as UTC
@@ -90,7 +64,7 @@ async function deleteTask(id) {
     return false;
   }
 
-  const response = await fetch(`${TASKS_API}/tasks/tasks/${id}`, {
+  const response = await fetch(`${CALENDAR_API}/tasks/tasks/${id}`, {
     method: "DELETE",
     headers: {
       "Authorization": `Bearer ${token}`
@@ -112,7 +86,7 @@ async function toggleTaskComplete(id, completed) {
     return;
   }
 
-  const response = await fetch(`${TASKS_API}/tasks/tasks/${id}`, {
+  const response = await fetch(`${CALENDAR_API}/tasks/tasks/${id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
