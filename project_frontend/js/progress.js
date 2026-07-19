@@ -408,24 +408,29 @@ async function loadProgressSummary() {
   // Only update if the element actually exists on the page
   if (progressBar) {
   // Format the number to 1 decimal place to match your text summary
-  const formattedPercent = percentComplete.toFixed(1); 
+    const formattedPercent = percentComplete.toFixed(1); 
     
-  progressBar.style.width = formattedPercent + "%";
-  progressBar.textContent = formattedPercent + "%";
+    progressBar.style.width = formattedPercent + "%";
+    progressBar.textContent = formattedPercent + "%";
+    if (percentComplete >= 100) {
+    progressBar.style.backgroundColor = "#191970";
+    } else if (percentComplete >= 70) {
+    progressBar.style.backgroundColor = "#32CD32";
+  } else if (percentComplete >= 40) {
+    progressBar.style.backgroundColor = "#E2725B";
+  } else {
+    progressBar.style.backgroundColor = "#950606";
   }
-    if (percentComplete <= 20) {
+}
+    if (percentComplete < 40) {
     summaryEl.textContent = `Procrasrination at its peak.`;
     return;
   }
-  if (percentComplete > 20 && percentComplete < 40) {
-    summaryEl.textContent = `Do better.`;
-    return;
-  }
-  if (percentComplete >= 40 && percentComplete < 60) {
+  if (percentComplete >= 40 && percentComplete < 70) {
     summaryEl.textContent = `Were you born for mediocrity or did that become the plan along the way?`;
     return;
   }
-  if (percentComplete >= 60 && percentComplete < 100) {
+  if (percentComplete >= 70 && percentComplete < 100) {
     summaryEl.textContent = `There might be hope for you yet.`;
     return;
   }
