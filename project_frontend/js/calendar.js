@@ -107,12 +107,22 @@ async function loadCalendarView() {
   const tasks = await getTasks();
   const container = document.getElementById("calendar-view");
   if (!container) return;
-  container.innerHTML = "";
 
   const activeTasks = tasks.filter(t => !t.completed);
 
+  if (activeTasks.length === 0) {
+    container.innerHTML = ""; // clear
+    const heading = document.createElement("h3");
+    heading.textContent = "My Calendar";
+    container.appendChild(heading);
+    return;
+  }
+
+  container.innerHTML = "";
+
   const grouped = {};
   BUCKET_ORDER.forEach(b => grouped[b] = []);
+
   activeTasks.forEach(task => {
     const bucket = getBucket(task.due_date);
     grouped[bucket].push(task);
@@ -122,7 +132,7 @@ async function loadCalendarView() {
 
   BUCKET_ORDER.forEach(bucket => {
     const tasksInBucket = grouped[bucket];
-    if (tasksInBucket.length === 0) return; // skip empty buckets
+    if (tasksInBucket.length === 0) return;
 
     const section = document.createElement("div");
     section.classList.add("calendar-bucket");
@@ -132,9 +142,14 @@ async function loadCalendarView() {
     section.appendChild(heading);
 
     const list = document.createElement("ul");
+
     tasksInBucket.forEach(task => {
       const li = document.createElement("li");
-      const scoreText = task.ready_score != null ? `Readiness: ${task.ready_score.toFixed(1)}%` : "Ready score not calculated";
+
+      const scoreText = task.ready_score != null
+        ? `Readiness: ${task.ready_score.toFixed(1)}%`
+        : "Ready score not calculated";
+
       const priorityText = priorityLabels[task.priority_level] || "Not set";
 
       li.innerHTML = `
