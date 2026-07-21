@@ -35,6 +35,7 @@ PASSWORD_REGEX = r"^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*()_+]).{8,50}$"
 class Signup(Resource):
     @auth_ns.expect(signup_model)
     def post(self):
+        """Create a user"""
         data = request.get_json() or {}
 
         username = (data.get('username') or "").strip()
@@ -82,6 +83,7 @@ class Signup(Resource):
 class Login(Resource):
     @auth_ns.expect(login_model)
     def post(self):
+        """Authenticate an existing user"""
         data = request.get_json() or {}
         username = (data.get('username') or '').strip()
         password = data.get('password') or ''
@@ -107,6 +109,7 @@ class Login(Resource):
 class Refresh(Resource):
     @jwt_required(refresh=True)
     def post(self):
+        """Refresh the access token of an existing user"""
         identity = get_jwt_identity()
         new_access_token = create_access_token(identity=identity)
         return {"access_token": new_access_token}, 200

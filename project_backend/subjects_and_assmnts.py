@@ -37,6 +37,7 @@ class SubjectListResource(Resource):
     @jwt_required()
     @subject_ns.expect(subject_input)
     def post(self):
+        """Creates a subject"""
         current_user = get_jwt_identity()
         data = request.get_json()
 

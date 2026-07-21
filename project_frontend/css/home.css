@@ -124,7 +124,7 @@ p{
   border-radius: 10px;
   border: 2px solid #BABF94;
 }
-#subject-name, #subject-priority, #assessment-number, #assessment-weight, #assessment-mark, #assessment-subject, #assessment-due-date, #task-due-date, #edit-task-title, #edit-task-description, #edit-task-priority, #edit-task-subject, #edit-task-duedate, #edit-task-hours, #task-hours {
+#assessment-number, #assessment-weight, #assessment-mark, #assessment-subject, #assessment-due-date, #task-due-date, #edit-task-title, #edit-task-description, #edit-task-priority, #edit-task-subject, #edit-task-duedate, #edit-task-hours, #task-hours {
   color: #000;
   display: block;
   margin: 10px auto;
@@ -147,7 +147,7 @@ p{
   height: 50px;
 }
 
-#clear-tasks-btn, #lgout, #addassessment, #edit-task, #cancel-edit {
+#lgout, #addassessment, #edit-task, #cancel-edit {
   width: 100px;
   height: 50px;
   cursor: pointer;
@@ -268,46 +268,7 @@ p{
     flex-direction: column;
   }
 }
-#task-list {
-  text-align: left;
-  font-size: 1.3rem;
-  margin-top: 10px;
-  margin-bottom: 10px;
-  color: #000;
-  font-family: "Playfair Display", serif;
-  list-style: none;
-  max-width: 600px;
-  margin: 0 auto;
-}
 
-#task-list li {
-  counter-increment: task-counter;
-}
-#task-list li::before {
-  content: counter(task-counter) ". ";
-  font-weight: bold;
-  color: #A98B76;
-}
-#completed-task-list {
-  text-align: left;
-  font-size: 1.3rem;
-  margin-top: 10px;
-  margin-bottom: 10px;
-  color: #000;
-  font-family: "Playfair Display", serif;
-  list-style: none;
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-#completed-task-list li {
-  counter-increment: task-counter;
-}
-#completed-task-list li::before {
-  content: counter(task-counter) ". ";
-  font-weight: bold;
-  color: #A98B76;
-}
 #assessment-list ul {
   list-style: none;
   counter-reset: assessment-counter;

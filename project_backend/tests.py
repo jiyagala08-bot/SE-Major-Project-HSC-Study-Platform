@@ -1,4 +1,4 @@
-
+#A file for testing backend functionality of python modules
 def calculate_timeinput_score(): #add in autofill from scheduler later
         print("Enter time input in hours:")
         timeinput = float(input())

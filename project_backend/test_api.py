@@ -1,3 +1,4 @@
+#A file for unit tests
 import unittest
 from flask_jwt_extended import create_access_token
 from project_backend.main import create_app

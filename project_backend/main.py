@@ -50,8 +50,7 @@ def create_app(config):
             "User":User
         }
     
-    """Adds a global error handler to catch all exceptions and return a JSON response with the error message and appropriate status code."""
-    #@app.errorhandler(Exception)
-    #def handle_error(e):
-        #return jsonify({"message": str(e)}), getattr(e, "code", 500)
+    @app.errorhandler(Exception) #Adds a global error handler to catch all exceptions and return a JSON response with the error message and appropriate status code.
+    def handle_error(e):
+        return jsonify({"message": str(e)}), getattr(e, "code", 500)
     return app

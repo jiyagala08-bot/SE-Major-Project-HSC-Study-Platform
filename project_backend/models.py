@@ -39,14 +39,17 @@ class Subject(db.Model):
     public_subject = db.relationship('PublicSubject', backref='private_subjects')
 
     def calculate_cumulative_score(self):
+        """Calculates the cumulative weighted score of a subject"""
         total = sum((a.score / a.total_score) * a.weight for a in self.assessments)
         return total
 
     def delete(self):
+        """Deletes a subject"""
         db.session.delete(self)
         db.session.commit()
 
     def save(self):
+        """Saves a subject"""
         db.session.add(self)
         db.session.commit()
 
@@ -59,10 +62,12 @@ class Assessment(db.Model):
     due_date = db.Column(db.DateTime, nullable=True)
 
     def save(self):
+        """Saves an assessment"""
         db.session.add(self)
         db.session.commit()
 
     def delete(self):
+        """Deletes an assessment"""
         db.session.delete(self)
         db.session.commit()
 
@@ -82,14 +87,17 @@ class Task(db.Model):
         return f"<Task {self.title}>"
     
     def save(self):
+        """Saves a task"""
         db.session.add(self)
         db.session.commit()
         
     def delete(self):
+        """Deletes a task"""
         db.session.delete(self)
         db.session.commit()
 
     def update(self,title,description, priority_level=None, subject_id=None, subject=None):
+        """Updates a task"""
         self.title=title
         self.description=description
         if priority_level is not None:
@@ -100,6 +108,7 @@ class Task(db.Model):
             self.subject = subject
     
     def days_left(self):
+        """Calculates the days left to the due date of a task"""
         return (self.due_date - date.today()).days
     
     def days_left_score(self):
@@ -151,10 +160,12 @@ class User(db.Model):
         return f"<User {self.username}>"
     
     def save(self):
+        """Saves a user"""
         db.session.add(self)
         db.session.commit()
 
     def create_profile(self):
+        """Creates a profile for the user"""
         profile = Profile(user_id=self.id, name=self.username, optimal_study_time=1)  # Default optimal study time
         db.session.add(profile)
         db.session.commit()

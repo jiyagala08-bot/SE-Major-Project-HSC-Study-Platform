@@ -48,6 +48,7 @@ class ProfileResource(Resource):
     @profile_ns.marshal_with(profile_model)
     @jwt_required()
     def put(self):
+        """Updates user details"""
         current_user = get_jwt_identity()
         user = User.query.get_or_404(current_user)
         data = request.get_json()

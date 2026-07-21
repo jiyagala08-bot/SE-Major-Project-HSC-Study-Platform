@@ -137,7 +137,7 @@ p{
   border: 2px solid #BABF94;
 }
 
-#clear-tasks-btn, #lgout, #addassessment, #edit-task, #cancel-edit {
+#lgout, #addassessment, #edit-task, #cancel-edit {
   width: 100px;
   height: 50px;
   cursor: pointer;
@@ -177,11 +177,6 @@ p{
   align-items: center;
 }
 
-#task-message {
-  text-align: center;
-  font-size: 1rem;
-  margin-top: 10px;
-}
 .task-container {
   display: flex;
   flex-direction: column;

@@ -129,9 +129,7 @@ class TaskResource(Resource):
 class TaskReadyScoreResource(Resource):
     @jwt_required()
     def post(self, id):
-        """
-        Calculate the ready score for a task.
-        """
+        """Calculate the ready score for a task."""
         current_user = get_jwt_identity()
         task = Task.query.get_or_404(id)
         if task.user_id != int(current_user):
