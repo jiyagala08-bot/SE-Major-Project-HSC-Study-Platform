@@ -5,7 +5,7 @@ const urlsToCache = [
   '/project_frontend/html/profile.html',
   '/project_frontend/html/progress.html',
   '/project_frontend/js/auth.js',
-  '/project_frontend/js/index.js',
+  '/project_frontend/js/tasks.js',
   '/project_frontend/js/service-worker.js',
   '/project_frontend/css/main.css',
   '/project_frontend/manifest.json',

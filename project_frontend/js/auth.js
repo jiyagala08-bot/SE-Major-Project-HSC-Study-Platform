@@ -63,7 +63,7 @@ async function signupUser() {
     return;
   }
 
-  if (data.message === `Password must contain at least one letter, number, and special character`) {
+  if (data.message === `Password must contain at least one uppercase letter, one lowercase letter, number, and special character`) {
     document.getElementById("signup-message").textContent = "";
     document.getElementById("signup-msg").textContent = "";
     document.getElementById("signup-message").textContent = data.message;
@@ -119,6 +119,13 @@ async function logoutUser() {
   const msg = document.getElementById("login-message");
   if (msg) msg.textContent = "Logged out";
   window.location.href = "/project_frontend/html/logon.html";
+}
+
+async function requireLogin() {
+  const token = await getValidAccessToken();
+  if (!token) {
+    window.location.href = "/project_frontend/html/logon.html";
+  }
 }
 
 async function getValidAccessToken() {

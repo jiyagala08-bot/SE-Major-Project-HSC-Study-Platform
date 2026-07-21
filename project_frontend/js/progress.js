@@ -6,15 +6,20 @@ function getToken() {
 
 let CURRENT_EDIT_TASK_ID = null;
 
+function showError(message) {
+  const el = document.getElementById("global-error");
+  if (!el) return alert(message); // fallback
+  el.textContent = message;
+  el.style.display = "block";
+}
+
 async function getTasks() {
   const token = await getValidAccessToken();
   if (!token) {
-    console.error("No valid access token available for task fetch");
-    // Redirect to login so user can re-authenticate
+    showError("Session expired. Please log in again.");
     window.location.href = "/project_frontend/html/logon.html";
-    return [];
+    return null;
   }
-
   const response = await fetch(`${TASKS_API}/tasks/tasks`, {
     method: "GET",
     headers: {
@@ -25,6 +30,7 @@ async function getTasks() {
   if (!response.ok) {
     const errorText = await response.text();
     console.error("Failed to fetch tasks", response.status, errorText);
+    showError("Failed to get tasks.");
     return [];
   }
 
@@ -33,8 +39,11 @@ async function getTasks() {
 
 async function loadSubjectsIntoEditSelect() {
   const token = await getValidAccessToken();
-  if (!token) return;
-
+  if (!token) {
+    showError("Session expired. Please log in again.");
+    window.location.href = "/project_frontend/html/logon.html";
+    return null;
+  }
   const response = await fetch(`${TASKS_API}/subjects/subjects`, {
     headers: { "Authorization": `Bearer ${token}` }
   });
@@ -66,7 +75,7 @@ function openTaskEditor(id, title, description, priority_level, subject_id, due_
   document.getElementById("edit-task-priority").value = priority_level;
   document.getElementById("edit-task-duedate").value = due_date;
 
-    document.getElementById("task-edit-overlay").style.display = "block";
+  document.getElementById("task-edit-overlay").style.display = "block";
   document.getElementById("task-edit-popup").style.display = "block";
 }
 
@@ -114,7 +123,7 @@ function handleCreateTask() {
 async function createTask(title, description, priority_level, subject_id, due_date) {
   const token = await getValidAccessToken();
   if (!token) {
-    alert("Session expired. Please log in again.");
+    showError("Session expired. Please log in again.");
     window.location.href = "/project_frontend/html/logon.html";
     return null;
   }
@@ -137,8 +146,7 @@ async function createTask(title, description, priority_level, subject_id, due_da
   const data = await response.json();
 
   if (!response.ok) {
-    document.getElementById("task-failmessage").textContent =
-      data.message || "Task creation failed";
+    showError("Failed to create task.");
     return null;
   }
 
@@ -150,8 +158,9 @@ async function createTask(title, description, priority_level, subject_id, due_da
 async function toggleTaskComplete(id, completed) {
   const token = await getValidAccessToken();
   if (!token) {
-    alert("Session expired. Please log in again.");
-    return;
+    showError("Session expired. Please log in again.");
+    window.location.href = "/project_frontend/html/logon.html";
+    return null;
   }
 
   const response = await fetch(`${TASKS_API}/tasks/tasks/${id}`, {
@@ -172,13 +181,17 @@ async function toggleTaskComplete(id, completed) {
 }
 async function calculateReadyScore(id, hours) {
   if (isNaN(hours) || hours < 0) {
-    alert("Please enter a valid number of hours before calculating.");
+    showError("Please enter a valid number of hours before calculating.");
     return;
   }
 
   saveHoursLocally(id, hours);
   const token = await getValidAccessToken();
-  if (!token) return;
+  if (!token) {
+    showError("Session expired. Please log in again.");
+    window.location.href = "/project_frontend/html/logon.html";
+    return null;
+  }
 
   const response = await fetch(`${TASKS_API}/tasks/tasks/${id}/ready-score`, {
     method: "POST",
@@ -190,7 +203,7 @@ async function calculateReadyScore(id, hours) {
   });
 
   if (!response.ok) {
-    alert("Failed to calculate ready score");
+    showError("Failed to calculate ready score");
     return;
   }
 
@@ -286,7 +299,7 @@ async function calculateReadyScoreSilent(id, hours) {
 async function deleteTask(id) {
   const token = await getValidAccessToken();
   if (!token) {
-    alert("Session expired. Please log in again.");
+    showError("Session expired. Please log in again.");
     return false;
   }
 
@@ -298,18 +311,57 @@ async function deleteTask(id) {
   });
 
   if (!response.ok) {
-    alert("Failed to delete task");
+    showError("Failed to delete task");
     return false;
   }
 
   return true;
 }
 
+async function updateTask(id, title, description, priority_level, subject_id, duedate) {
+  const token = await getValidAccessToken();
+  if (!token) {
+    showError("Session expired. Please log in again.");
+    return null;
+  }
+
+  // Title length restriction
+  if (title.length > 100) {
+    showError("Task name cannot exceed 100 characters.");
+    return null;
+  }
+
+  // Description length restriction
+  if (description.length > 500) {
+    showError("Task description cannot exceed 500 characters.");
+    return null;
+  }
+
+  const response = await fetch(`${TASKS_API}/tasks/tasks/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+    body: JSON.stringify({
+      title,
+      description,
+      priority_level,
+      subject_id,
+      due_date: duedate
+    })
+  });
+
+  const data = await response.json();
+  return data;
+}
+
 async function loadSubjectsIntoSelect() {
   const token = await getValidAccessToken();
   if (!token) {
+    showError("Session expired. Please log in again.");
     window.location.href = "/project_frontend/html/logon.html";
-    return;
+    return null;
   }
 
   const response = await fetch(`${TASKS_API}/subjects/subjects`, {

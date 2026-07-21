@@ -89,6 +89,11 @@ async function saveTaskEdits() {
     // recalc ready score automatically
     await calculateReadyScore(CURRENT_EDIT_TASK_ID, hours);
     closeTaskEditor();
+    if (!response.ok) {
+    document.getElementById("task-failmessage").textContent =
+    data.message || "Task editing failed";
+    return null;
+    }
     loadTasks();
   }
 }

@@ -114,7 +114,7 @@ p{
 }
 
 /* Input fields */
-#signup-email, #signup-username, #signup-password, #signup-cpassword, #task-title, #task-description, #task-priority, #task-subject, #subject-name, #subject-priority{
+#signup-email, #signup-username, #signup-password, #signup-cpassword{
   color: #000;
   display: block;
   margin: 10px auto;
@@ -125,8 +125,7 @@ p{
   border: 2px solid #BABF94;
 }
 
-#login-email, #login-username, #login-password, #assessment-number, #assessment-weight, #assessment-mark, #assessment-subject {
-  color: #000;
+#login-email, #login-username, #login-password {
   display: block;
   margin: 10px auto;
   width: 300px;
@@ -147,7 +146,7 @@ p{
   height: 50px;
 }
 
-#clear-tasks-btn, #sign-up-btn, #login-btn, #lgout {
+#sign-up-btn, #login-btn, #lgout {
   width: 100px;
   height: 50px;
   cursor: pointer;
