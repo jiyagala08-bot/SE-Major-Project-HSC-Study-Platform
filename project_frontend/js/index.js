@@ -198,6 +198,19 @@ async function calculateReadyScore(id, hours) {
 
 async function loadTasks() {
   const tasks = await getTasks();
+
+  // Auto-refresh ready scores for active tasks with saved hours
+  for (const task of tasks) {
+    if (!task.completed) {
+      const savedHours = parseFloat(getSavedHours(task.id));
+      if (!isNaN(savedHours)) {
+        await calculateReadyScoreSilent(task.id, savedHours);
+      }
+    }
+  }
+
+  const refreshedTasks = await getTasks();
+
   const activeList = document.getElementById("task-list");
   const completedList = document.getElementById("completed-task-list");
   activeList.innerHTML = "";
@@ -205,7 +218,7 @@ async function loadTasks() {
 
   const priorityLabels = { 1: "Low", 2: "Medium", 3: "High" };
 
-  tasks.forEach(task => {
+  refreshedTasks.forEach(task => {
     const item = document.createElement("li");
     const scoreText = task.ready_score != null ? `Readiness: ${task.ready_score.toFixed(1)}%` : "Ready score not calculated";
     const priorityText = priorityLabels[task.priority_level] || "Not set";
@@ -254,6 +267,19 @@ async function loadTasks() {
       `;
       activeList.appendChild(item);
     }
+  });
+}
+async function calculateReadyScoreSilent(id, hours) {
+  const token = await getValidAccessToken();
+  if (!token) return;
+
+  await fetch(`${TASKS_API}/tasks/tasks/${id}/ready-score`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+    body: JSON.stringify({ timeinput: hours })
   });
 }
 async function getTask(id) {

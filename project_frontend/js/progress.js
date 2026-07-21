@@ -199,6 +199,19 @@ async function calculateReadyScore(id, hours) {
 
 async function loadTasks() {
   const tasks = await getTasks();
+
+  // Auto-refresh ready scores for active tasks with saved hours
+  for (const task of tasks) {
+    if (!task.completed) {
+      const savedHours = parseFloat(getSavedHours(task.id));
+      if (!isNaN(savedHours)) {
+        await calculateReadyScoreSilent(task.id, savedHours);
+      }
+    }
+  }
+
+  const refreshedTasks = await getTasks();
+
   const activeList = document.getElementById("task-list");
   const completedList = document.getElementById("completed-task-list");
   activeList.innerHTML = "";
@@ -206,7 +219,7 @@ async function loadTasks() {
 
   const priorityLabels = { 1: "Low", 2: "Medium", 3: "High" };
 
-  tasks.forEach(task => {
+  refreshedTasks.forEach(task => {
     const item = document.createElement("li");
     const scoreText = task.ready_score != null ? `Readiness: ${task.ready_score.toFixed(1)}%` : "Ready score not calculated";
     const priorityText = priorityLabels[task.priority_level] || "Not set";
@@ -257,73 +270,19 @@ async function loadTasks() {
     }
   });
 }
-async function getTask(id) {
+async function calculateReadyScoreSilent(id, hours) {
   const token = await getValidAccessToken();
-  if (!token) {
-    console.error("No valid access token available for getTask");
-    return null;
-  }
+  if (!token) return;
 
-  const response = await fetch(`${TASKS_API}/tasks/tasks/${id}`, {
-    method: "GET",
-    headers: {
-      "Authorization": `Bearer ${token}`
-    }
-  });
-
-  if (!response.ok) {
-    console.error("Task not found");
-    return null;
-  }
-
-  return response.json();
-}
-
-async function updateTask(id, title, description, priority_level, subject_id, duedate) {
-  const token = await getValidAccessToken();
-  if (!token) {
-    alert("Session expired. Please log in again.");
-    return null;
-  }
-
-  // Title length restriction
-  if (title.length > 100) {
-    alert("Task name cannot exceed 100 characters.");
-    return null;
-  }
-
-  // Description length restriction
-  if (description.length > 500) {
-    alert("Task description cannot exceed 500 characters.");
-    return null;
-  }
-
-  const response = await fetch(`${TASKS_API}/tasks/tasks/${id}`, {
-    method: "PUT",
+  await fetch(`${TASKS_API}/tasks/tasks/${id}/ready-score`, {
+    method: "POST",
     headers: {
       "Content-Type": "application/json",
       "Authorization": `Bearer ${token}`
     },
-    body: JSON.stringify({
-      title,
-      description,
-      priority_level,
-      subject_id,
-      due_date: duedate
-    })
+    body: JSON.stringify({ timeinput: hours })
   });
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    alert(data.message || "Failed to update task");
-    return null;
-  }
-
-  return data;
 }
-
-
 async function deleteTask(id) {
   const token = await getValidAccessToken();
   if (!token) {
@@ -361,7 +320,8 @@ async function loadSubjectsIntoSelect() {
 
   const subjects = await response.json();
   const select = document.getElementById("task-subject");
-  select.innerHTML = ""; // Clear existing
+  if (!select) return;
+  select.innerHTML = "";
 
   subjects.forEach(sub => {
     const option = document.createElement("option");
