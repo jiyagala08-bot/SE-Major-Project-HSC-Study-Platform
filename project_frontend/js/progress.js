@@ -210,8 +210,43 @@ async function calculateReadyScore(id, hours) {
   await loadTasks();
 }
 
+function recommendTask(tasks) {
+  if (!tasks || tasks.length === 0) return null;
+
+  const today = new Date().toISOString().split("T")[0];
+
+  // 1. Overdue tasks (due date < today)
+  const overdue = tasks.filter(t => !t.completed && t.due_date && t.due_date < today);
+  if (overdue.length > 0) {
+    return overdue[0]; // earliest overdue task
+  }
+
+  // 2. Tasks due today
+  const dueToday = tasks.filter(t => !t.completed && t.due_date === today);
+  if (dueToday.length > 0) {
+    return dueToday[0];
+  }
+
+  // 3. Fallback: first active task in the ordered list
+  const active = tasks.filter(t => !t.completed);
+  if (active.length > 0) {
+    return active[0];
+  }
+  return null;
+}
+
 async function loadTasks() {
   const tasks = await getTasks();
+  const recommended = recommendTask(tasks);
+
+  if (recommended) {
+    console.log("Recommended task: ", recommended.title);
+   // You can display it anywhere in your UI:
+    const recEl = document.getElementById("recommended-task");
+   if (recEl) {
+    recEl.textContent = `Recommend completing: ${recommended.title}`;
+  }
+}
 
   // Auto-refresh ready scores for active tasks with saved hours
   for (const task of tasks) {
@@ -222,7 +257,7 @@ async function loadTasks() {
       }
     }
   }
-
+  
   const refreshedTasks = await getTasks();
 
   const activeList = document.getElementById("task-list");

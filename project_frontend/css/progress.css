@@ -382,7 +382,7 @@ p{
     font-weight: bold;
     border-radius: 10px 0 0 10px;
   }
-  #progress-summary {
+  #progress-summary, #recommended-task {
   font-family: serif;
   font-style: italic;
   font-weight: bold;
