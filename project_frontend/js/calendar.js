@@ -18,8 +18,9 @@ function startOfDay(date) {
 
 function getMonday(date) {
   const d = startOfDay(date);
-  const day = d.getDay(); // 0 = Sunday, 1 = Monday, ...
-  const diff = day === 0 ? -6 : 1 - day; // shift Sunday back to previous Monday
+  const day = d.getDay(); // 0 = Sunday, 1 = Monday etc.
+  const diff = day === 0 ? -6 : 1 - day; // shift Sunday back to previous Monday. 
+  // Normalizes any date to the Monday of its week; treats Sunday as belonging to the previous week.
   d.setDate(d.getDate() + diff);
   return d;
 }
@@ -30,7 +31,8 @@ function addDays(date, days) {
   return d;
 }
 
-function getBucket(dueDateStr) {
+function getBucket(dueDateStr) { // Categorizes a due date into user-friendly time buckets used by the calendar UI.
+// Uses week and month boundaries to ensure consistent grouping.
   if (!dueDateStr) return "No due date";
 
   const today = startOfDay(new Date());
@@ -53,6 +55,7 @@ function getBucket(dueDateStr) {
   if (due >= thisMonthStart && due < nextMonthStart) return "This Month";
   if (due >= nextMonthStart && due < monthAfterNextStart) return "Next Month";
   return "Later";
+  // Defines the display order for calendar sections so buckets appear consistently.
 }
 
 const BUCKET_ORDER = ["Overdue", "Today", "Tomorrow", "This Week", "Next Week", "This Month", "Next Month", "Later", "No due date"];
@@ -125,12 +128,12 @@ async function loadCalendarView() {
 
   activeTasks.forEach(task => {
     const bucket = getBucket(task.due_date);
-    grouped[bucket].push(task);
+    grouped[bucket].push(task); // Groups active tasks into calendar buckets based on due date classification.
   });
 
   const priorityLabels = { 1: "Low", 2: "Medium", 3: "High" };
 
-  BUCKET_ORDER.forEach(bucket => {
+  BUCKET_ORDER.forEach(bucket => { // Renders each bucket as a separate section with its tasks listed underneath.
     const tasksInBucket = grouped[bucket];
     if (tasksInBucket.length === 0) return;
 
@@ -170,6 +173,6 @@ async function loadCalendarView() {
   });
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", () => { // Builds the calendar UI once the page has fully loaded.
   loadCalendarView();
 });

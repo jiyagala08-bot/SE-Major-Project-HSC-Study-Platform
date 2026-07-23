@@ -15,9 +15,10 @@ def create_app(config):
     app.config.from_object(config)
 
     CORS(app,
-         resources={r"/*": {"origins": "*"}},
-         allow_headers=["Content-Type", "Authorization"],
-         methods=["GET", "HEAD", "POST", "OPTIONS", "PUT", "PATCH", "DELETE"])
+        resources={r"/*": {"origins": "*"}},
+        allow_headers=["Content-Type", "Authorization"],
+        methods=["GET", "HEAD", "POST", "OPTIONS", "PUT", "PATCH", "DELETE"])
+# Global CORS configuration allowing all origins useful for local dev and frontend integration, but may need tightening in production.
 
     @app.after_request
     def add_cors_headers(response):

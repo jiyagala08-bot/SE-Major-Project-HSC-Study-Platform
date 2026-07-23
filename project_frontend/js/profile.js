@@ -3,12 +3,13 @@ const PROFILE_API = "https://improved-space-yodel-r7gr699jrr662wwjj-5000.app.git
 function displayProfile(profile) {
   document.getElementById("display-name").textContent = profile.name || "Not set";
   document.getElementById("display-school-year").textContent = profile.school_year ? `Year ${profile.school_year}` : "Not set";
-  document.getElementById("display-birthdate").textContent = profile.birthdate ? profile.birthdate.split("T")[0] : "Not set";
+  document.getElementById("display-birthdate").textContent = profile.birthdate ? profile.birthdate.split("T")[0] : "Not set"; 
+  // Removes time component from ISO datetime strings returned by the backend.
 }
 
 async function loadProfile() {
   const token = await getValidAccessToken();
-  if (!token) return;
+  if (!token) return; // Prevents profile fetch when session is invalid; caller handles redirect.
 
   const res = await fetch(`${PROFILE_API}/profile/`, {
     headers: { "Authorization": "Bearer " + token }
@@ -26,6 +27,7 @@ async function loadProfile() {
   }
   if (profile.birthdate) {
     document.getElementById("profile-birthdate").value = profile.birthdate.split("T")[0];
+    // Converts backend ISO date into YYYY-MM-DD format for HTML date inputs.
   }
   displayProfile(profile);
 }
@@ -58,10 +60,12 @@ async function updateProfile() {
   } else {
     const data = await res.json();
     alert(data.message || "Failed to update profile");
+    // Displays backend validation errors to the user.
   }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  // Initializes profile and related dropdowns once the page is fully loaded.
   loadProfile();
   loadSubjects();
   loadAssessments();

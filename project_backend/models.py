@@ -2,13 +2,7 @@ from project_backend.exts import db
 from sqlalchemy import CheckConstraint
 from datetime import date
 
-"""
-class Task:
-    id:int primary key
-    title:str
-    description:str
-"""
-class PublicSubject(db.Model):
+class PublicSubject(db.Model): #from early scaffolding; not deleted due to lack of time to remove all traces and ensure no broken functionality.
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
     description = db.Column(db.Text, nullable=False)
@@ -18,7 +12,8 @@ class Profile(db.Model):
     name = db.Column(db.String, nullable=False)
     school_year = db.Column(db.Integer, CheckConstraint('school_year >= 7 AND school_year <= 12'), nullable=True)
     birthdate = db.Column(db.Date, nullable=True)
-    optimal_study_time = db.Column(db.Integer, CheckConstraint('optimal_study_time >= 1 AND optimal_study_time <= 4'), nullable=True)
+    optimal_study_time = db.Column(db.Integer, CheckConstraint('optimal_study_time >= 1 AND optimal_study_time <= 4'), nullable=True) 
+    #optimal_study_time not implemented and left as overhead due to the risk of broken system functionality
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user = db.relationship("User", back_populates="profile")
 

@@ -25,6 +25,8 @@ async function getTasks() {
     window.location.href = "/project_frontend/html/logon.html";
     return null;
   }
+  // Handles expired or invalid tokens by redirecting and prevents the UI from breaking.
+  // Also logs backend error text for debugging instead of silently failing.
   const response = await fetch(`${TASKS_API}/tasks/tasks`, {
     method: "GET",
     headers: {
@@ -42,7 +44,7 @@ async function getTasks() {
   return response.json();
 }
 
-async function loadSubjectsIntoEditSelect() {
+async function loadSubjectsIntoEditSelect() { // Repopulates the subject dropdown dynamically so edits always reflect current subjects.
   const token = await getValidAccessToken();
   if (!token) return;
   const response = await fetch(`${TASKS_API}/subjects/subjects`, {
@@ -64,6 +66,7 @@ async function loadSubjectsIntoEditSelect() {
 }
 
 function openTaskEditor(id, title, description, priority_level, subject_id, due_date) {
+  // Ensures subject list is loaded before setting the selected subject in the editor.
   CURRENT_EDIT_TASK_ID = id;
 
   // Load subjects into the dropdown
@@ -87,6 +90,7 @@ function closeTaskEditor() {
   CURRENT_EDIT_TASK_ID = null;
 }
 async function saveTaskEdits() {
+  // Automatically recalculates readiness after edits so the UI stays consistent.
   const title = document.getElementById("edit-task-title").value.trim();
   const description = document.getElementById("edit-task-description").value.trim();
   const priority_level = parseInt(document.getElementById("edit-task-priority").value);
@@ -174,7 +178,8 @@ async function toggleTaskComplete(id, completed) {
 
   await loadTasks();
 }
-async function calculateReadyScore(id, hours) {
+async function calculateReadyScore(id, hours) { 
+  // Validates user input and stores hours locally so readiness can auto-refresh later.
   if (isNaN(hours) || hours < 0) {
     showError("Please enter a valid number of hours before calculating.");
     return;
@@ -206,6 +211,7 @@ async function calculateReadyScore(id, hours) {
 }
 
 function recommendTask(tasks) {
+  // Recommendation logic: overdue takes precedence over due today which takes precedence over first active task (most prioritized task in list).
   if (!tasks || tasks.length === 0) return null;
 
   const today = new Date().toISOString().split("T")[0];
@@ -231,19 +237,18 @@ function recommendTask(tasks) {
 }
 
 async function loadTasks() {
-  const tasks = await getTasks();
+  const tasks = await getTasks(); // 1. Fetches tasks
   const recommended = recommendTask(tasks);
 
-  if (recommended) {
+  if (recommended) { // Determines which tasks to recommend
     console.log("Recommended task: ", recommended.title);
-   // You can display it anywhere in your UI:
     const recEl = document.getElementById("recommended-task");
    if (recEl) {
     recEl.textContent = `Recommend completing: ${recommended.title}`;
   }
 }
 
-  // Auto-refresh ready scores for active tasks with saved hours
+  // 3. Auto-refresh ready scores for active tasks with saved hours (important for when date changes)
   for (const task of tasks) {
     if (!task.completed) {
       const savedHours = parseFloat(getSavedHours(task.id));
@@ -254,7 +259,7 @@ async function loadTasks() {
   }
   
   const refreshedTasks = await getTasks();
-
+  // 4. Active and complete task lists
   const activeList = document.getElementById("task-list");
   const completedList = document.getElementById("completed-task-list");
   activeList.innerHTML = "";
@@ -268,7 +273,7 @@ async function loadTasks() {
     const priorityText = priorityLabels[task.priority_level] || "Not set";
     const dueDateText = task.due_date || "Not set";
     const hoursText = getSavedHours(task.id) || "Not set";
-
+    //Display of active tasks
     const detailsHtml = `
       <div class="task-details">
         <span>Priority: ${priorityText}</span>
@@ -282,7 +287,7 @@ async function loadTasks() {
         <span>Description: ${task.description ? task.description : "No description"}</span>
       </div>
     `;
-
+    //Display of complete tasks
     if (task.completed) {
       item.innerHTML = `
         <s>${task.title}</s> - ${scoreText}
@@ -314,6 +319,7 @@ async function loadTasks() {
   });
 }
 async function calculateReadyScoreSilent(id, hours) {
+  // Silent background recalculation used during page load; avoids UI flicker or alerts.
   const token = await getValidAccessToken();
   if (!token) return;
 
@@ -423,6 +429,8 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 async function loadProgressSummary() {
+  // Aggregates readiness across all tasks to produce a single progress metric.
+  // Updates both the progress bar and motivational text based on thresholds.
   const tasks = await getTasks();
   const summaryEl = document.getElementById("progress-summary");
   if (!summaryEl) return;
@@ -509,12 +517,11 @@ const quotes = [
   "Limit your 'always' and your 'nevers'. — Amy Poehler",
   "Never bend your head. Always hold it high. Look the world straight in the eye. — Helen Keller",
   "Opportunities don't happen. You create them. — Chris Grosser",
-  "Be yourself; everyone else is already taken. — Oscar Wilde",
-  "The HSC is not the end of the world. — Your teachers before you get your marks"
+  "Be yourself; everyone else is already taken. — Oscar Wilde"
 ];
 
-  //Generate a random index based on the array length and get the random quote
-const randomIndex = Math.floor(Math.random() * quotes.length);
+//Generate a random index based on the array length and get the random motivational quote
+const randomIndex = Math.floor(Math.random() * quotes.length); // Selects a random motivational quote on each page load.
 const randomQuote = quotes[randomIndex];
 
 document.addEventListener("DOMContentLoaded", () => {

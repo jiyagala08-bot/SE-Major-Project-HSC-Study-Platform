@@ -25,7 +25,7 @@ login_model = auth_ns.model(
         'password': fields.String()
     }
 )
-
+# Regex patterns for validating email, username, and password formats.
 EMAIL_REGEX = r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
 USERNAME_REGEX = r"^[A-Za-z0-9\s-]{3,30}$"
 PASSWORD_REGEX = r"^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*()_+]).{8,50}$"
@@ -42,7 +42,8 @@ class Signup(Resource):
         email = (data.get('email') or '').strip()
         password = data.get('password') or ''
 
-        # LENGTH CHECKS
+        # LENGTH CHECKS (Explicit length checks are done separately from regex so the 
+        # user receives clearer, more specific error messages instead of a generic regex failure.)
         if len(password) < 8:
             return {"message": "Password must be at least 8 characters long"}, 400
 
@@ -74,7 +75,8 @@ class Signup(Resource):
             password=generate_password_hash(password)
         )
         new_user.save()
-        new_user.create_profile()  # Create an associated profile for the new user
+        new_user.create_profile()  # Create an associated profile for the new user so the frontend never encounters a user without profile.
+
 
         return {"message": "User created successfully. A verification email has been sent."}, 201
 
@@ -91,13 +93,16 @@ class Login(Resource):
         if not re.match(USERNAME_REGEX, username):
             return {"message": "Invalid username format"}, 400
 
-        db_user = User.query.filter_by(username=username).first()
+        db_user = User.query.filter_by(username=username).first() #username used as login identifier
 
         if db_user is None or not check_password_hash(db_user.password, password):
-            return {"message": "Invalid username or password"}, 401
+            return {"message": "Invalid username or password"}, 401 # Prevents username enumeration attacks by returning the same error message.
+
 
         access_token = create_access_token(identity=str(db_user.id))
         refresh_token = create_refresh_token(identity=str(db_user.id))
+        # JWT identity stores only the user ID to keep tokens lightweight and avoid exposing sensitive user data inside the token payload.
+
 
         return {
             "message": "User logged in",

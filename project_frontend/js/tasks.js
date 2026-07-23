@@ -30,7 +30,7 @@ async function getTasks() {
 }
 let CURRENT_EDIT_TASK_ID = null;
 
-async function loadSubjectsIntoEditSelect() {
+async function loadSubjectsIntoEditSelect() { // Refreshes subject list so the editor always reflects current subjects.
   const token = await getValidAccessToken();
   if (!token) return;
 
@@ -55,8 +55,8 @@ async function loadSubjectsIntoEditSelect() {
 function openTaskEditor(id, title, description, priority_level, subject_id, due_date) {
   CURRENT_EDIT_TASK_ID = id;
 
-  // Load subjects into the dropdown
-  loadSubjectsIntoEditSelect().then(() => {
+  // Ensures subject dropdown is populated before selecting the correct subject for editing.
+  loadSubjectsIntoEditSelect().then(() => { 
     document.getElementById("edit-task-subject").value = subject_id;
   });
 
@@ -86,7 +86,7 @@ async function saveTaskEdits() {
   const updated = await updateTask(CURRENT_EDIT_TASK_ID, title, description, priority_level, subject_id, duedate);
 
   if (updated) {
-    // recalc ready score automatically
+    // Recalculates readiness immediately after edits so task ordering stays accurate.
     await calculateReadyScore(CURRENT_EDIT_TASK_ID, hours);
     closeTaskEditor();
     if (!response.ok) {
@@ -140,7 +140,7 @@ async function createTask(title, description, priority_level, subject_id, due_da
 
   const data = await response.json();
 
-  if (!response.ok) {
+  if (!response.ok) { // Displays backend validation errors directly to the user instead of alerts.
     document.getElementById("task-failmessage").textContent =
       data.message || "Task creation failed";
     return null;
@@ -180,7 +180,7 @@ async function calculateReadyScore(id, hours) {
     return;
   }
 
-  saveHoursLocally(id, hours);
+  saveHoursLocally(id, hours); // Stores estimated hours locally so readiness can auto-refresh on page load.
   const token = await getValidAccessToken();
   if (!token) return;
 
@@ -204,7 +204,7 @@ async function calculateReadyScore(id, hours) {
 async function loadTasks() {
   const tasks = await getTasks();
 
-  // Auto-refresh ready scores for active tasks with saved hours
+  // Auto-refresh ready scores for active tasks with saved hours to keep upto date.
   for (const task of tasks) {
     if (!task.completed) {
       const savedHours = parseFloat(getSavedHours(task.id));
@@ -274,7 +274,7 @@ async function loadTasks() {
     }
   });
 }
-async function calculateReadyScoreSilent(id, hours) {
+async function calculateReadyScoreSilent(id, hours) { // Background recalculation used during page load; avoids alerts or UI interruptions.
   const token = await getValidAccessToken();
   if (!token) return;
 
@@ -309,7 +309,7 @@ async function getTask(id) {
   return response.json();
 }
 
-async function updateTask(id, title, description, priority_level, subject_id, duedate) {
+async function updateTask(id, title, description, priority_level, subject_id, duedate) { // Prevents sending oversized fields to backend; mirrors backend validation rules.
   const token = await getValidAccessToken();
   if (!token) {
     alert("Session expired. Please log in again.");
@@ -376,7 +376,7 @@ async function deleteTask(id) {
   return true;
 }
 
-async function loadSubjectsIntoSelect() {
+async function loadSubjectsIntoSelect() { // Populates subject selector for task creation so users always see current subjects.
   const token = await getValidAccessToken();
   if (!token) {
     window.location.href = "/project_frontend/html/logon.html";
@@ -411,7 +411,7 @@ function getSavedHours(taskId) {
 document.addEventListener("DOMContentLoaded", () => {
   loadTasks();
   loadSubjectsIntoSelect();
-  loadSubjects(); // Populate assessment-subject select and assessment list
+  loadSubjects();
 });
 
 const quotes = [
@@ -443,12 +443,11 @@ const quotes = [
   "Limit your 'always' and your 'nevers'. — Amy Poehler",
   "Never bend your head. Always hold it high. Look the world straight in the eye. — Helen Keller",
   "Opportunities don't happen. You create them. — Chris Grosser",
-  "Be yourself; everyone else is already taken. — Oscar Wilde",
-  "The HSC is not the end of the world. — Your teachers before you get your marks"
+  "Be yourself; everyone else is already taken. — Oscar Wilde"
 ];
 
-  //Generate a random index based on the array length and get the random quote
-const randomIndex = Math.floor(Math.random() * quotes.length);
+//Generate a random index based on the array length and get the random quote
+const randomIndex = Math.floor(Math.random() * quotes.length); // Selects a random motivational quote on each page load.
 const randomQuote = quotes[randomIndex];
 
 document.addEventListener("DOMContentLoaded", () => {

@@ -21,6 +21,9 @@ def _get_or_create_profile(user):
         db.session.refresh(profile)
         user.profile = profile
     return user.profile
+# Ensures every user always has a profile. If missing, create one immediately.
+# This prevents frontend errors where a user exists but their profile doesn't.
+# db.session.refresh() reloads the instance so relationship bindings stay correct.
 
 
 profile_model = profile_ns.model(
@@ -56,15 +59,19 @@ class ProfileResource(Resource):
         profile = _get_or_create_profile(user)
 
         profile.name = data.get('name') or profile.name
-        profile.optimal_study_time = data.get('optimal_study_time', profile.optimal_study_time)
+        profile.optimal_study_time = data.get('optimal_study_time', profile.optimal_study_time) #not implemented and left as overhead due to the risk of broken system functionality
         profile.school_year = data.get('school_year', profile.school_year)
+
+        # Partial update pattern: only overwrite fields provided in the request,
+        # preserving existing values for omitted fields.
 
         if data.get('birthdate'):
             try:
                 profile.birthdate = datetime.fromisoformat(data['birthdate']).date()
             except ValueError:
                 return {"message": "birthdate must be in YYYY-MM-DD format"}, 400
-
+    
         db.session.commit()
 
         return profile, 200
+    

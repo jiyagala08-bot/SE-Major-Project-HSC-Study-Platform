@@ -11,7 +11,7 @@ function requireLogin() {
 
   return true;
 }
-
+// Local caches used to avoid repeated API calls and speed up weighted-average calculations.
 let SUBJECT_CACHE = [];
 let ASSESSMENT_CACHE = [];
 let CURRENT_EDIT_SUBJECT_ID = null;
@@ -65,7 +65,7 @@ async function loadSubjects() {
   if (!list) return; // Element doesn't exist on this page
   list.innerHTML = "";
 
-  function getDifficultyLabel(level) {
+  function getDifficultyLabel(level) { // Converts numeric difficulty into a user-friendly label for UI display.
   if (level <= 3) return "Low";
   if (level <= 6) return "Medium";
   return "High";
@@ -196,6 +196,7 @@ async function saveSubjectEdits() {
 }
 
 function calculateSubjectWeightedAverage(subjectId) {
+// Computes weighted average, returns null if subject has no assessments or total weight is zero.
   const subjectAssessments = ASSESSMENT_CACHE.filter(a => a.subject_id === subjectId);
 
   if (subjectAssessments.length === 0) return null;
@@ -211,12 +212,13 @@ function calculateSubjectWeightedAverage(subjectId) {
 }
 
 function calculateGrade(weightedAverage) {
+  // Maps weighted average to grade bands (A–E) using fixed thresholds.
   let avg = parseFloat(weightedAverage);
   if (avg === null) return "N/A";
-  if (avg >= 80) return "A";
-  if (avg >= 60) return "B";
-  if (avg >= 40) return "C";
-  if (avg >= 20) return "D";
+  if (avg >= 85) return "A";
+  if (avg >= 65) return "B";
+  if (avg >= 45) return "C";
+  if (avg >= 25) return "D";
   return "E";
 }
 
@@ -251,7 +253,7 @@ async function loadAssessments() {
     const subject = SUBJECT_CACHE.find(s => s.id === parseInt(subjectId));
     const subjectName = subject ? subject.name : `Unknown Subject (${subjectId})`;
 
-    // Subject header WITH cumulative weighted score
+  // Subject header WITH cumulative weighted score. Displays subject-level summary (cumulative weighted mark + grade) before listing individual assessments.
   const avg = calculateSubjectWeightedAverage(parseInt(subjectId));
   const avgText = avg ? ` - Cumulative Mark: ${avg}%` : "";
   const gradeText = avg ? ` - Grade: ${calculateGrade(avg)}` : "";
@@ -284,7 +286,7 @@ async function createAssessment() {
   const subject_id = parseInt(document.getElementById("assessment-subject").value);
   const score = parseInt(document.getElementById("assessment-mark").value);
   const weight = parseInt(document.getElementById("assessment-weight").value);
-  // Calculate existing total weight for this subject
+  // Calculate existing total weight for this subject. Prevents total assessment weight for a subject from exceeding 100%.
   const existingWeightTotal = ASSESSMENT_CACHE
     .filter(a => a.subject_id === subject_id)
     .reduce((sum, a) => sum + a.weight, 0);
@@ -354,6 +356,7 @@ async function deleteAssessment(id) {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+  // Initializes subject and assessment data when the page loads.
   if (!requireLogin()) return;
 
   await loadSubjects();

@@ -33,6 +33,7 @@ class SubjectListResource(Resource):
         subjects = Subject.query.filter_by(user_id=current_user) \
                           .order_by(Subject.difficulty_level.desc())\
                           .all()
+        # Order by difficulty so the frontend receives subjects in a consistent priority sequence.
         return subjects
     @jwt_required()
     @subject_ns.expect(subject_input)
@@ -44,8 +45,8 @@ class SubjectListResource(Resource):
         new_subject = Subject(
             name=data['name'],
             difficulty_level=data.get('difficulty_level', data.get('priority_level', 1)),
+            # Supports legacy 'priority_level' field for backward compatibility.
             user_id=current_user,
-            #due_date=data.get('due_date')
         )
 
         new_subject.save()
@@ -60,6 +61,7 @@ class SubjectResource(Resource):
         """Delete a subject by id"""
         current_user=get_jwt_identity()
         subject = Subject.query.filter_by(id=id, user_id=current_user).first_or_404()
+        # Ensures users can only delete their own subjects.
         subject.delete()
         return {"message": "Subject deleted", "id": id}, 200
     @jwt_required()
@@ -67,7 +69,7 @@ class SubjectResource(Resource):
         """Calculate the cumulative weighted mark for a subject"""
         current_user=get_jwt_identity()
         subject = Subject.query.filter_by(id=id, user_id=current_user).first_or_404()
-        cumulative_score = subject.calculate_cumulative_score()
+        cumulative_score = subject.calculate_cumulative_score() #function in models.py
         return {"cumulative_score": cumulative_score}, 200
     @jwt_required()
     def put(self, id):
@@ -76,7 +78,7 @@ class SubjectResource(Resource):
         subject = Subject.query.filter_by(id=id, user_id=current_user).first_or_404()
         data = request.get_json() or {}
         if subject.user_id != int(current_user):
-            return{"message" : "Forbidden"}, 403
+            return{"message" : "Forbidden"}, 403 # Extra safety check in case a subject is fetched incorrectly or IDs mismatch.
         subject.name = data.get('name', subject.name)
         subject.difficulty_level = data.get('difficulty_level', subject.difficulty_level)
         subject.save()
@@ -124,7 +126,7 @@ class AssessmentListResource(Resource):
     def get(self):
         """Get all assessments"""
         current_user=get_jwt_identity()
-        assessments = Assessment.query.join(Subject).filter(Subject.user_id == current_user).all()
+        assessments = Assessment.query.join(Subject).filter(Subject.user_id == current_user).all() # Join ensures users only see assessments belonging to their subjects.
         return assessments
     @jwt_required()
     @assessment_ns.expect(assessment_input)
@@ -140,11 +142,12 @@ class AssessmentListResource(Resource):
             weight=data.get('weight'),
             due_date=parse_due_date(data.get('due_date'))
         )
-        subject = Subject.query.filter_by(id=data.get('subject_id'), user_id=current_user).first()
+        subject = Subject.query.filter_by(id=data.get('subject_id'), user_id=current_user).first() #Prevents creating assessments for subjects owned by other users.
         if not subject:
             return {'message': 'Invalid subject_id'}, 403
         elif new_assessment.subject_id is None or new_assessment.score is None or new_assessment.total_score is None or new_assessment.weight is None:
             return {"message": "Subject ID, score, total score and weight are required"}, 400
+        # Manual validation to avoid partially‑constructed assessments.
         new_assessment.save()
         return new_assessment, 201
 
@@ -158,6 +161,7 @@ class AssessmentResource(Resource):
             Assessment.id == id,
             Subject.user_id == current_user
         ).first_or_404()
+        # Ensures the assessment belongs to the current user before deletion.
         assessment.delete()
         return {"message": "Assessment deleted", "id": id}, 200
     

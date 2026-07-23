@@ -1,4 +1,5 @@
 const AUTH_API = "https://improved-space-yodel-r7gr699jrr662wwjj-5000.app.github.dev";
+// Base URL for backend auth endpoints (GitHub Codespaces proxy).
 
 async function signupUser() {
   if (!document.getElementById("signup-email")) return;
@@ -9,15 +10,16 @@ async function signupUser() {
   const cpassword = document.getElementById("signup-cpassword").value;
 
   if (password !== cpassword) {
-    document.getElementById("signup-message").textContent = "Passwords do not match";
-    return;
-  }
+  document.getElementById("signup-message").textContent = "Passwords do not match";
+  return;
+}
+// Prevents sending a request when client-side validation already fails.
 
   const response = await fetch(`${AUTH_API}/auth/signup`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, username, password })
-  });
+  }); // Backend returns detailed validation messages; frontend mirrors them directly.
 
   const data = await response.json();
   console.log('Login response', { status: response.status, body: data });
@@ -29,7 +31,7 @@ async function signupUser() {
 
     setTimeout(() => {
       window.location.href = "/project_frontend/html/logon.html";
-    }, 1000);
+    }, 1000); // Small delay so the success message is visible before redirecting.
     
     document.getElementById("signup-email").value = "";
     document.getElementById("signup-username").value = "";
@@ -99,6 +101,7 @@ async function loginUser() {
     document.getElementById("login-msg").textContent = "";
     localStorage.setItem("access_token", data.access_token);
     localStorage.setItem("refresh_token", data.refresh_token);
+    // Persist tokens for authenticated requests and automatic refresh.
     document.getElementById("login-msg").textContent = `Login successful! Welcome back, ${username}`;
     document.getElementById("login-username").value = "";
     document.getElementById("login-password").value = "";
@@ -122,7 +125,7 @@ async function logoutUser() {
 }
 
 async function requireLogin() {
-  const token = await getValidAccessToken();
+  const token = await getValidAccessToken(); // Ensures protected pages always have a valid access token (auto-refresh if needed).
   if (!token) {
     window.location.href = "/project_frontend/html/logon.html";
   }
@@ -130,7 +133,7 @@ async function requireLogin() {
 let isRedirectingToLogin = false;
 
 function redirectToLogin(message) {
-  if (isRedirectingToLogin) return;
+  if (isRedirectingToLogin) return; // Prevents multiple redirects firing at once (race condition guard).
   isRedirectingToLogin = true;
 
   const el = document.getElementById("global-error");
@@ -151,13 +154,13 @@ async function getValidAccessToken() {
   let access = localStorage.getItem("access_token");
   const refresh = localStorage.getItem("refresh_token");
 
-  // If there's no refresh token, session is truly gone
+  // If refresh token is missing, session cannot be recovered.
   if (!refresh) {
     redirectToLogin("Session expired. Please log in again.");
     return null;
   }
 
-  if (!access) {
+  if (!access) { // Automatically refreshes access token when expired or missing.
     const refreshed = await refreshAccessToken(refresh);
     if (!refreshed) {
       redirectToLogin("Session expired. Please log in again.");
@@ -181,7 +184,7 @@ async function refreshAccessToken(refresh) {
       data = JSON.parse(text);
     } catch (e) {
       console.warn('Refresh response is not JSON', text);
-    }
+    } // Handles cases where backend returns non-JSON (e.g., HTML error pages).
     console.log('Refresh response', { status: refreshResponse.status, body: data || text });
 
     if (!refreshResponse.ok) {

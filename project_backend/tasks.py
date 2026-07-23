@@ -41,6 +41,8 @@ def parse_due_date(value):
         return date.fromisoformat(value)
     except ValueError:
         return date.today()
+    # Falls back to today's date if the input is missing or invalid.
+
 
 @task_ns.route('/tasks')
 class TaskListResource(Resource):
@@ -54,6 +56,8 @@ class TaskListResource(Resource):
                 .filter_by(user_id=current_user)
                 .order_by(Task.priority_level.desc(), Task.ready_score.asc())
                 .all())
+        #Loads the related Subject in one query, avoiding repeated database calls per task (N+1 problem).
+        # Ordered by priority (high to low) then readiness (low to high).
         if not tasks:
             return {"message": "No tasks found"}, 404
         return tasks
@@ -69,7 +73,7 @@ class TaskListResource(Resource):
         title = data.get('title')
         description = data.get('description')
 
-        if not title or not description:
+        if not title or not description: # Prevents creating incomplete tasks.
             return {"message": "Title and description are required"}, 400
 
         new_task = Task(
@@ -92,7 +96,7 @@ class TaskResource(Resource):
         """Get a task by id"""
         current_user = get_jwt_identity()
         task = Task.query.get_or_404(id)
-        if task.user_id != int(current_user):
+        if task.user_id != int(current_user): # Ensures users can only access or modify their own tasks.
             return {"message": "Forbidden"}, 403        
         return task, 200
 
@@ -167,20 +171,20 @@ class TaskReadyScoreResource(Resource):
             timeinput_score = 1
         else:
             timeinput_score = 5
-
+        # Converts estimated time input into a normalized difficulty score.
         days_left_score = task.days_left_score()
         # Convert frontend 1–3 scale into backend 1–10 scale
         priority_map = {1: 3, 2: 6, 3: 9}
         priority_level = priority_map.get(task.priority_level, 6)
         subject_difficulty = task.subject.difficulty_level if task.subject else 5
         subject_cumulative_score = (task.subject.calculate_cumulative_score() * 0.1) if task.subject else 5
-
+        # Adds subject performance as a small weighting factor.
         ready_score = ((10 - priority_level)
                        + subject_difficulty
                        + days_left_score * 0.5
                        + timeinput_score * 0.5
                        + subject_cumulative_score) / 40 * 100
-
+        # Weighted formula combining urgency, difficulty, time estimate, and subject performance.
         task.ready_score = ready_score
         task.save()
 

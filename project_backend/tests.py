@@ -1,5 +1,5 @@
-#A file for testing backend functionality of python modules
-def calculate_timeinput_score(): #add in autofill from scheduler later
+#A file for testing math logic of ready score function
+def calculate_timeinput_score():
         print("Enter time input in hours:")
         timeinput = float(input())
         if timeinput <= 3:
