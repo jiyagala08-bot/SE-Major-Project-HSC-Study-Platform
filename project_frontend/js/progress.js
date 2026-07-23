@@ -11,6 +11,11 @@ function showError(message) {
   if (!el) return alert(message); // fallback
   el.textContent = message;
   el.style.display = "block";
+
+  clearTimeout(window._errorTimeout);
+  window._errorTimeout = setTimeout(() => {
+    el.style.display = "none";
+  }, 5000);
 }
 
 async function getTasks() {
@@ -39,11 +44,7 @@ async function getTasks() {
 
 async function loadSubjectsIntoEditSelect() {
   const token = await getValidAccessToken();
-  if (!token) {
-    showError("Session expired. Please log in again.");
-    window.location.href = "/project_frontend/html/logon.html";
-    return null;
-  }
+  if (!token) return;
   const response = await fetch(`${TASKS_API}/subjects/subjects`, {
     headers: { "Authorization": `Bearer ${token}` }
   });
@@ -122,11 +123,7 @@ function handleCreateTask() {
 
 async function createTask(title, description, priority_level, subject_id, due_date) {
   const token = await getValidAccessToken();
-  if (!token) {
-    showError("Session expired. Please log in again.");
-    window.location.href = "/project_frontend/html/logon.html";
-    return null;
-  }
+  if (!token) return;
 
   const response = await fetch(`${TASKS_API}/tasks/tasks`, {
     method: "POST",
@@ -158,8 +155,6 @@ async function createTask(title, description, priority_level, subject_id, due_da
 async function toggleTaskComplete(id, completed) {
   const token = await getValidAccessToken();
   if (!token) {
-    showError("Session expired. Please log in again.");
-    window.location.href = "/project_frontend/html/logon.html";
     return null;
   }
 
@@ -173,7 +168,7 @@ async function toggleTaskComplete(id, completed) {
   });
 
   if (!response.ok) {
-    alert("Failed to update task");
+    showError("Failed to update task.");
     return;
   }
 
@@ -334,7 +329,6 @@ async function calculateReadyScoreSilent(id, hours) {
 async function deleteTask(id) {
   const token = await getValidAccessToken();
   if (!token) {
-    showError("Session expired. Please log in again.");
     return false;
   }
 
@@ -356,7 +350,6 @@ async function deleteTask(id) {
 async function updateTask(id, title, description, priority_level, subject_id, duedate) {
   const token = await getValidAccessToken();
   if (!token) {
-    showError("Session expired. Please log in again.");
     return null;
   }
 
@@ -394,8 +387,6 @@ async function updateTask(id, title, description, priority_level, subject_id, du
 async function loadSubjectsIntoSelect() {
   const token = await getValidAccessToken();
   if (!token) {
-    showError("Session expired. Please log in again.");
-    window.location.href = "/project_frontend/html/logon.html";
     return null;
   }
 

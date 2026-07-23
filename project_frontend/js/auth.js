@@ -127,21 +127,44 @@ async function requireLogin() {
     window.location.href = "/project_frontend/html/logon.html";
   }
 }
+let isRedirectingToLogin = false;
+
+function redirectToLogin(message) {
+  if (isRedirectingToLogin) return;
+  isRedirectingToLogin = true;
+
+  const el = document.getElementById("global-error");
+  if (el) {
+    el.textContent = message;
+    el.style.color = "#950606";
+    el.style.display = "block";
+  } else {
+    alert(message);
+  }
+
+  setTimeout(() => {
+    window.location.href = "/project_frontend/html/logon.html";
+  }, 1000);
+}
 
 async function getValidAccessToken() {
   let access = localStorage.getItem("access_token");
   const refresh = localStorage.getItem("refresh_token");
 
-  // If there's no refresh token, signal caller to redirect/login
+  // If there's no refresh token, session is truly gone
   if (!refresh) {
+    redirectToLogin("Session expired. Please log in again.");
     return null;
   }
 
   if (!access) {
-    return await refreshAccessToken(refresh);
+    const refreshed = await refreshAccessToken(refresh);
+    if (!refreshed) {
+      redirectToLogin("Session expired. Please log in again.");
+    }
+    return refreshed;
   }
 
-  // If we have an access token, return it and let callers handle failed requests.
   return access;
 }
 
